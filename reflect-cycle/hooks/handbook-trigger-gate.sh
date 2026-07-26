@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+__fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate aborted (rc=$rc)" >&2; exit 2; fi; }
+trap __fc EXIT
 # PreToolUse hook (Bash matching `git commit`): enforces the handbook-trigger
 # half of contract §21 — when a commit's staged change set introduces or
 # changes an operational surface (an env var / config key, a dependency

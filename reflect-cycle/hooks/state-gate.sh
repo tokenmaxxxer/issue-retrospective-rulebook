@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+__fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate aborted (rc=$rc)" >&2; exit 2; fi; }
+trap __fc EXIT
 # PreToolUse hook (Write|Edit|NotebookEdit|Bash): enforces reflect-cycle's
 # state machine, and (per docs/specs/role-handoff-contract.md v2) the
 # handoff contract's write-side rules, against the RESOLVED TARGET PATH

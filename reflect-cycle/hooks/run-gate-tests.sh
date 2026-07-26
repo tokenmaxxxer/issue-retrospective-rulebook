@@ -417,6 +417,29 @@ else
   fail "(o) malformed JSON payload did NOT exit 2 (got exit $code_o): $GATE_OUT"
 fi
 
+# --- (s) fail-closed trap-at-top: a PRE-LOGIC abort (before the verdict
+# logic runs) must be forced to exit 2 (DENY), never a non-2 fail-open.
+# Claude Code PreToolUse hooks treat any non-2 exit as NON-blocking, so a
+# gate that aborts early (a failed source, a `set -u` unbound-var abort, a
+# syntax path) would fail OPEN without the trap installed as the FIRST
+# executable statement. Build a copy of the gate with an unbound-variable
+# reference injected immediately after `set -uo pipefail` (i.e. before any
+# verdict logic can run); under `set -u` this aborts with exit 1 =
+# NON-blocking. With the trap-at-top in place it must be remapped to exit 2.
+root_s="$work/s"
+setup_root "$root_s" "reflecting"
+gate_s="$work/state-gate-prelogic-abort.sh"
+awk 'BEGIN{done=0} {print} /^set -uo pipefail$/ && !done {print ": \"$__REFLECT_PRELOGIC_ABORT_UNBOUND__\""; done=1}' "$gate" > "$gate_s"
+chmod +x "$gate_s"
+payload_s="$(json_write "$root_s" "reflecting")"
+GATE_OUT="$(printf '%s' "$payload_s" | CLAUDE_PROJECT_DIR="$root_s" "$gate_s" 2>&1)"
+code_s=$?
+if [ "$code_s" -eq 2 ]; then
+  pass "(s) pre-logic abort (unbound var before verdict logic) is forced closed to DENY (exit 2)"
+else
+  fail "(s) pre-logic abort did NOT fail closed to exit 2 (got exit $code_s): $GATE_OUT"
+fi
+
 echo
 echo "== $pass_count passed, $fail_count failed =="
 [ "$fail_count" -eq 0 ]
