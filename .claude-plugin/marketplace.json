@@ -1,0 +1,18 @@
+{
+  "name": "tokenmaxxxer-reflect",
+  "owner": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  },
+  "plugins": [
+    {
+      "name": "reflect-cycle",
+      "source": "./reflect-cycle",
+      "description": "Reflect record state machine: idle -> reflecting -> done. Wakes after a subject's work has landed and verify and/or review have concluded (a verify-record reaching `cleared`, or a review-record reaching `reported`); the reflect-record must carry a non-empty pointer to the other role records it read; its findings are advisory only per contract §5."
+    },
+    {
+      "name": "reflect-agent-env",
+      "source": "./reflect-agent-env",
+      "description": "One-install environment bundle: installs reflect-cycle via dependency."
+    }
+  ]
+}

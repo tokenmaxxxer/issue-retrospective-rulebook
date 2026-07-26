@@ -1,0 +1,8 @@
+{
+  "name": "reflect-cycle",
+  "version": "0.1.0",
+  "description": "Reflect record state machine: idle -> reflecting -> done. Wakes after a subject's work has landed and verify and/or review have concluded (a verify-record reaching `cleared`, or a review-record reaching `reported`); the reflect-record must carry a non-empty pointer to the other role records it read; its findings are advisory only per contract §5.",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}
