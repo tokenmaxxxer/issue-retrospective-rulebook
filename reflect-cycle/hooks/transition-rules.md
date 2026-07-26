@@ -20,3 +20,17 @@ user-gated).
 | done | reflecting | user | user sends the retro back for rework |
 
 Two `actor: user` rows.
+
+## Commit trailer (contract §13)
+
+reflect-cycle's declared machine-checkable commit trailer is
+`Subject: <subject>`, enforced by `trailer-gate.sh` whenever a reflect unit
+is in progress (`reflect/state.md` exists with a non-terminal `stage`, i.e.
+not `done`). A commit landing an in-progress reflect-record must carry this
+trailer identifying the subject. This is stated here, in the rulebook's own
+docs, rather than being discoverable only via the hook's rejection at commit
+time.
+
+No new `loop_state`/`stage` values are introduced by the §11/§20/§21/§13
+procedure gates: they key only on the already-registered `idle`,
+`reflecting`, `done` vocabulary above (`done` is the sole terminal state).
