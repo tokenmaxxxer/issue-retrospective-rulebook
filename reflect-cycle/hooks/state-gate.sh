@@ -157,6 +157,18 @@ def deny(msg):
 def allow():
     sys.exit(0)
 
+# --- fail-closed on internal error (frozen contract) -----------------------
+# Any uncaught exception in this judge (e.g. os.path.realpath on a null-byte
+# or undecodable path raising ValueError) must become a DENY (exit 2), never
+# an uncaught exit 1 that PreToolUse treats as non-blocking (fail-open).
+def _reflect_fail_closed(_t, _v, _tb):
+    try:
+        sys.stderr.write("reflect-cycle: refused — fail-closed: internal error (%s: %s)\n" % (_t.__name__, _v))
+    except Exception:
+        pass
+    os._exit(2)
+sys.excepthook = _reflect_fail_closed
+
 root = os.environ["REFLECT_ROOT"]
 rules_path = os.environ["REFLECT_RULES_PATH"]
 raw = os.environ.get("REFLECT_PAYLOAD", "")
@@ -772,5 +784,13 @@ deny(
     "for %s." % (old_stage, new_stage, STATE_REL)
 )
 PY
-status=$?
-exit "$status"
+rc=$?
+# Fail-closed shell layer (frozen contract): the judge's exit code decides
+# allow(0)/deny(2). ANY other exit code — a crash, an unguarded pipeline
+# abort, a killed interpreter — maps to a DENY (exit 2), never passes through
+# as a non-2 non-zero that PreToolUse would treat as non-blocking (fail-open).
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+  echo "reflect-cycle: refused — fail-closed: internal error (gate judge exited $rc)" >&2
+  exit 2
+fi
+exit "$rc"

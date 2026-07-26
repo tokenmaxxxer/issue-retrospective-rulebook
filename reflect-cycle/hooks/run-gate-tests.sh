@@ -387,6 +387,36 @@ fi
 
 cleanup_scratch
 
+# --- (n) fail-closed on internal error: null byte in file_path -> DENY(2) --
+# A null byte in tool_input.file_path makes os.path.realpath raise an
+# uncaught ValueError, which without the fail-closed layers would exit 1 =
+# NON-blocking (fail-open). The gate must map it to exit 2 (DENY).
+root_n="$work/n"
+setup_root "$root_n" "reflecting"
+payload_n="$(python3 -c '
+import json
+fp = "reflect/" + chr(0) + "state.md"
+print(json.dumps({"tool_name": "Write", "tool_input": {"file_path": fp, "content": "x"}}))
+')"
+run_gate "$root_n" "$payload_n"
+code_n=$?
+if [ "$code_n" -eq 2 ]; then
+  pass "(n) null byte in file_path is fail-closed to DENY (exit 2)"
+else
+  fail "(n) null byte in file_path did NOT fail closed to exit 2 (got exit $code_n): $GATE_OUT"
+fi
+
+# --- (o) fail-closed: malformed JSON must exit 2 (never a non-2 fail-open) -
+root_o="$work/o"
+setup_root "$root_o" "reflecting"
+GATE_OUT="$(printf '%s' '{ this is not json' | CLAUDE_PROJECT_DIR="$root_o" "$gate" 2>&1)"
+code_o=$?
+if [ "$code_o" -eq 2 ]; then
+  pass "(o) malformed JSON payload fails closed to DENY (exit 2)"
+else
+  fail "(o) malformed JSON payload did NOT exit 2 (got exit $code_o): $GATE_OUT"
+fi
+
 echo
 echo "== $pass_count passed, $fail_count failed =="
 [ "$fail_count" -eq 0 ]

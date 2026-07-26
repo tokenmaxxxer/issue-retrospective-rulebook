@@ -88,6 +88,29 @@ run_gate trailer-gate.sh "$r" "$(json_bash 'git commit -m "land retro
 Subject: subj"')"
 expect_allow "trailer §13 passes in-progress commit with Subject: trailer" $?
 
+########## 6. fail-closed on internal error (all gates) ##########
+# Each gate must map an internal crash to exit 2 (DENY), never a non-2
+# non-zero that PreToolUse treats as NON-blocking (fail-open).
+expect_deny2() { local name="$1" code="$2"; if [ "$code" -eq 2 ]; then pass "$name (fail-closed DENY, exit 2)"; else fail "$name did NOT fail closed to exit 2 (got exit $code): $GATE_OUT"; fi; }
+
+# null byte in file_path -> os.path.realpath raises ValueError -> must be 2.
+json_write_nullpath() { # <content>
+  python3 -c 'import json,sys;print(json.dumps({"tool_name":"Write","tool_input":{"file_path":"docs/reports/records/subj/"+chr(0)+"reflect.md","content":sys.argv[1]}}))' "$1"
+}
+r="$(mkroot "$work/fc")"
+for g in record-fields-gate.sh path-ownership-gate.sh doc-bucket-gate.sh; do
+  run_gate "$g" "$r" "$(json_write_nullpath "x")"
+  expect_deny2 "$g null-byte file_path" $?
+done
+
+# Bash-only gates (handbook/trailer): a malformed JSON payload must exit 2.
+r="$(mkroot "$work/fcb")"
+mkdir -p "$r/reflect"; printf -- '---\nstage: reflecting\n---\n' > "$r/reflect/state.md"
+for g in handbook-trigger-gate.sh trailer-gate.sh; do
+  run_gate "$g" "$r" '{ this is not valid json'
+  expect_deny2 "$g malformed JSON" $?
+done
+
 echo "-----"
 echo "procedure-gates: $pass_count passed, $fail_count failed"
 [ "$fail_count" -eq 0 ]
