@@ -2,19 +2,14 @@
 __fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate aborted (rc=$rc)" >&2; exit 2; fi; }
 trap __fc EXIT
 # PreToolUse hook (Bash matching `git commit`): enforces contract §13's
-# commit-trailer requirement for reflect-cycle. When a reflect unit is in
-# progress (reflect/state.md exists with a NON-TERMINAL stage — i.e. not
-# `done`), a commit landing that work must carry reflect's declared
-# machine-checkable trailer identifying the subject:
+# commit-trailer requirement. A commit that stages anything under an issue
+# tree (docs/issue-<n>/**) must carry the machine-checkable trailer naming
+# that subject:
 #
-#     Subject: <subject>
+#     Subject: issue-<n>
 #
-# (reflect's declared trailer key, per §13's "each rulebook's own concern".)
-# A commit made while a unit is open that lacks this trailer is refused.
-# When no unit is in progress (no reflect/state.md, or its stage is the
-# terminal `done`), this gate does not apply.
-#
-# Additive sibling to state-gate.sh; never edits it.
+# and one commit belongs to one subject — staging two issues' trees in one
+# commit is refused. Commits staging no issue-tree work pass through.
 # Fail-closed: a commit whose message cannot be read statically while a unit
 # is open is DENIED (use `git commit -m` so the trailer is verifiable).
 # Kill switch: export REFLECT_CYCLE_OFF=1
@@ -110,24 +105,26 @@ if root is None:
 if not root:
     deny("trailer-gate: no project root could be determined for the commit; refusing rather than allowing an unverified commit.")
 
-# --- is a reflect unit in progress? --------------------------------------
-state_path = posixpath.join(root, "reflect/state.md")
-if not os.path.exists(state_path):
-    allow()  # no unit in progress
+# --- does this commit stage issue-tree work? ------------------------------
 try:
-    with open(state_path, encoding="utf-8-sig") as fh:
-        state_text = fh.read(1 << 20)
-except OSError as exc:
-    deny("trailer-gate: reflect/state.md exists but could not be read (%s); refusing rather than allowing an unverified in-progress commit." % exc)
+    out = subprocess.run(["git", "-C", root, "diff", "--cached", "--name-only"],
+                         capture_output=True, text=True, timeout=10)
+    staged = [l.strip() for l in out.stdout.splitlines() if l.strip()] if out.returncode == 0 else None
+except Exception:
+    staged = None
+if staged is None:
+    deny("trailer-gate: could not read the staged file list to decide whether this commit lands issue-tree work; refusing rather than allowing an unverified commit.")
 
-m = re.search(r'^\s*stage\s*:\s*(\S+)', state_text, re.M)
-if not m:
-    deny("trailer-gate: reflect/state.md exists but has no parseable `stage:` field; cannot determine whether a unit is in progress. Refusing rather than allowing an unverified commit.")
-stage = m.group(1).strip().lower()
-
-TERMINAL = {"done"}
-if stage in TERMINAL:
-    allow()  # unit concluded; §13 trailer requirement does not gate it
+issues = set()
+for f in staged:
+    im = re.match(r"^docs/(issue-[0-9]+)/", f)
+    if im:
+        issues.add(im.group(1))
+if not issues:
+    allow()  # no issue-tree work staged; the trailer requirement does not gate it
+if len(issues) > 1:
+    deny("trailer-gate: this commit stages work for multiple issues (%s); one commit belongs to one subject (contract s13). Split the commit." % ", ".join(sorted(issues)))
+issue = sorted(issues)[0]
 
 # --- unit in progress: require reflect's Subject: trailer ----------------
 # Extract commit messages statically from -m/--message. If the commit
@@ -160,11 +157,11 @@ joined = "\n".join(messages)
 
 if not messages:
     if uses_file_or_editor:
-        deny("trailer-gate: a reflect unit is in progress (reflect/state.md stage '%s') and this commit supplies its message via a file/editor, so the required `Subject:` trailer (contract §13) cannot be verified statically. Pass the message with `git commit -m` including a `Subject: <subject>` trailer." % stage)
-    deny("trailer-gate: a reflect unit is in progress (reflect/state.md stage '%s') and this commit carries no inline `-m` message, so its `Subject:` trailer (contract §13) cannot be verified. Use `git commit -m` with a `Subject: <subject>` trailer." % stage)
+        deny("trailer-gate: this commit stages %s work and supplies its message via a file/editor, so the required `Subject: %s` trailer (contract s13) cannot be verified statically. Pass the message with `git commit -m`." % (issue, issue))
+    deny("trailer-gate: this commit stages %s work but carries no inline `-m` message, so its `Subject: %s` trailer (contract s13) cannot be verified. Use `git commit -m`." % (issue, issue))
 
-if not re.search(r'(?im)^\s*Subject:\s*\S', joined):
-    deny("trailer-gate: a reflect unit is in progress (reflect/state.md stage '%s') but this commit message lacks reflect's required `Subject: <subject>` trailer (contract §13, reflect-cycle's declared trailer key). Add the trailer identifying the subject this commit's reflect-record belongs to." % stage)
+if not re.search(r"(?im)^\s*Subject:\s*" + re.escape(issue) + r"\s*$", joined):
+    deny("trailer-gate: this commit stages %s work but its message lacks the required `Subject: %s` trailer (contract s13). The trailer names the subject the staged record belongs to." % (issue, issue))
 
 allow()
 PY
