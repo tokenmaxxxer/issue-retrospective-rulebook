@@ -5,14 +5,9 @@
   },
   "plugins": [
     {
-      "name": "reflect-cycle",
-      "source": "./reflect-cycle",
-      "description": "Reflect record state machine: idle -> reflecting -> done. Wakes after a subject's work has landed and verify and/or review have concluded (a verify-record reaching `cleared`, or a review-record reaching `reported`); the reflect-record must carry a non-empty pointer to the other role records it read; its findings are advisory only per contract §5."
-    },
-    {
-      "name": "reflect-agent-env",
-      "source": "./reflect-agent-env",
-      "description": "One-install environment bundle: installs reflect-cycle via dependency."
+      "name": "reflect",
+      "source": "./reflect",
+      "description": "The reflect role on contract v3: the retrospective for an issue, built from the subject's other role records only. Directive carries the four facets (exemplar retros + recurred-prediction research, records-only survey, named-inputs proposal, round-end value gates + advisory-only findings); gates enforce the record's required fields and the Subject: issue-<n> trailer."
     }
   ]
 }

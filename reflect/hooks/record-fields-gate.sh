@@ -3,12 +3,11 @@ __fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate
 trap __fc EXIT
 # PreToolUse hook (Write|Edit|MultiEdit|NotebookEdit): enforces contract §20
 # per-role record minimum content on writes reaching reflect's OWN record
-# (`docs/reports/records/<subject>/reflect.md`, resolved by target path).
+# (`docs/issue-<n>/reports/reflect.md`, resolved by target path).
 #
-# Composes as a PEER to state-gate.sh — it never edits state-gate.sh and
-# never touches reflect/state.md. state-gate.sh validates the state-file
-# transition and the reflect-record's DEPENDS-ON pointer; THIS gate validates
-# §20's minimum-content sections on the same proposed record content.
+# Composes as a PEER to core's board-gate (which owns layout, branch, and
+# ownership); THIS gate validates §20's minimum-content sections plus
+# reflect's own required fields on the proposed record content.
 #
 # Fail-closed: any malformed/missing/unresolvable input is a DENY, never a
 # silent allow. Writes not reaching reflect's own record pass through.
@@ -115,7 +114,7 @@ if resolved != real_root and not resolved.startswith(real_root + "/"):
     allow()
 rel = resolved[len(real_root) + 1:] if resolved.startswith(real_root + "/") else ""
 
-RECORD_RE = re.compile(r'^docs/reports/records/([^/]+)/reflect\.md$')
+RECORD_RE = re.compile(r'^docs/issue-[0-9]+/reports/reflect\.md$')
 if not RECORD_RE.match(rel):
     allow()
 
@@ -195,7 +194,7 @@ if not (has(r'^\s*(?:records_read|upstream_records|upstream)\s*:') or has(r'\bup
 if loop_state is None:
     missing.append("the record's own loop_state")
 
-TERMINAL = {"done", "cleared", "reported", "round-done"}
+TERMINAL = {"round-done"}
 open_work = loop_state is not None and loop_state not in TERMINAL
 if open_work:
     if not has(r'next[\s-]?steps|backlog'):

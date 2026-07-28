@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-shot installer for the tokenmaxxxer reflect-role stack.
 # Registers the tokenmaxxxer-reflect marketplace and installs the
-# reflect-agent-env bundle (which pulls reflect-cycle in as a dependency),
+# reflect plugin,
 # then refreshes the marketplace once.
 #
 # Installs for your account only (user scope). Uses a real `claude` CLI
@@ -15,7 +15,7 @@
 set -euo pipefail
 
 MARKET="tokenmaxxxer-reflect"
-BUNDLE="reflect-agent-env"
+BUNDLE="reflect"
 GITHUB_REPO="tokenmaxxxer/reflect-agent-rulebook"
 
 usage() {
@@ -136,12 +136,12 @@ if [ -n "$CLI" ] && [ -x "$CLI" ]; then
   "$CLI" plugin marketplace update "$MARKET" >/dev/null 2>&1 || true
 
   install_failed=""
-  for plugin in reflect-cycle; do
+  for plugin in reflect; do
     "$CLI" plugin install "$plugin@$MARKET" --scope user || install_failed="$install_failed $plugin"
   done
   "$CLI" plugin install "$BUNDLE@$MARKET" --scope user || install_failed="$install_failed $BUNDLE"
 
-  for plugin in reflect-cycle; do
+  for plugin in reflect; do
     "$CLI" plugin update "$plugin@$MARKET" || true
   done
   "$CLI" plugin update "$BUNDLE@$MARKET" || true
@@ -169,5 +169,5 @@ cat <<'MSG'
       auto-update, so future stack additions arrive automatically. There is
       no CLI/config switch for this toggle; it is a one-time interactive step.
     - without auto-update, refresh manually anytime:
-      claude plugin update reflect-agent-env@tokenmaxxxer-reflect
+      claude plugin update reflect@tokenmaxxxer-reflect
 MSG
