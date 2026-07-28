@@ -44,7 +44,7 @@ fi
 # In v3 the forged-approval and foreign-record probes belong to core's
 # board-gate; what THIS rulebook owes is contract s20 substance — a reflect
 # record with none of the required sections must not be writable.
-probe_dir="$dir"
+probe_dir="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../reflect/hooks" && pwd -P)}"
 rec_rel="docs/issue-999/reports/reflect.md"
 
 substance_probe() {

@@ -35,7 +35,7 @@ recgate() { # want name file content
   td="$(cd "$(mktemp -d)" && pwd -P)"; git init -q "$td"; mkdir -p "$td/docs/issue-3/reports"
   printf '{"tool_name":"Write","tool_input":{"file_path":"%s","content":%s},"cwd":"%s"}' \
     "$3" "$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$4")" "$td" \
-    | env CLAUDE_PROJECT_DIR="$td" /bin/bash "$HERE/../record-fields-gate.sh" >/dev/null 2>&1
+    | env CLAUDE_PROJECT_DIR="$td" /bin/bash "$HERE/../reflect/hooks/record-fields-gate.sh" >/dev/null 2>&1
   rc=$?; case "$rc" in 0) got=allow ;; 2) got=deny ;; *) got="exit-$rc" ;; esac
   rm -rf "$td"; report "$1" "$got" "$2"
 }
@@ -59,7 +59,7 @@ trailergate() { # want name stagepath commitcmd
     && mkdir -p "$(dirname "$3")" && echo x > "$3" && git add "$3" )
   printf '{"tool_name":"Bash","tool_input":{"command":%s},"cwd":"%s"}' \
     "$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$4")" "$td" \
-    | ( cd "$td" && env -u CLAUDE_PROJECT_DIR /bin/bash "$HERE/../trailer-gate.sh" ) >/dev/null 2>&1
+    | ( cd "$td" && env -u CLAUDE_PROJECT_DIR /bin/bash "$HERE/../reflect/hooks/trailer-gate.sh" ) >/dev/null 2>&1
   rc=$?; case "$rc" in 0) got=allow ;; 2) got=deny ;; *) got="exit-$rc" ;; esac
   rm -rf "$td"; report "$1" "$got" "$2"
 }

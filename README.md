@@ -32,7 +32,9 @@ next issue; it never blocks this one.
                                         `Subject: issue-<n>`; one commit, one
                                         subject; inline -m only
     reflect/hooks/handbook-trigger-gate.sh  s21 same-turn handbook sync
-    reflect/hooks/tests/                run-gate-tests.sh + parse-check.sh
+    tests/                              repo-level checks (never installed
+                                        into a session): run-gate-tests.sh,
+                                        parse-check.sh, deny-only-check.sh
 
 Everything that used to live here for coordination — the state machine and
 its injection, path ownership, docs-bucket layout, the per-repo contract
@@ -55,6 +57,6 @@ does the same by hand. Kill switch: `REFLECT_CYCLE_OFF=1`.
 
 ## Run the checks
 
-    /bin/bash reflect/hooks/tests/parse-check.sh
-    /bin/bash reflect/hooks/tests/run-gate-tests.sh
-    /bin/bash reflect/hooks/deny-only-check.sh reflect/hooks
+    /bin/bash tests/parse-check.sh
+    /bin/bash tests/run-gate-tests.sh
+    /bin/bash tests/deny-only-check.sh
