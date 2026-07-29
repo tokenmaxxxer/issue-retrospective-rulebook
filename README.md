@@ -15,9 +15,10 @@ bar on its record.
 What this issue's history teaches — what went well, what failed, and what
 pattern should change next time — built from the subject's other role
 records only, never from fresh re-investigation of the running system.
-Wakes once the subject's work has landed and verify and/or review have
-concluded. Findings are always `severity: advisory`: reflect informs the
-next issue; it never blocks this one.
+When this role wakes is decided by on-the-record's routing table
+(`docs/specs/wake-routing.md`), not by this rulebook. Findings are always
+`severity: advisory`: reflect informs the next issue; it never blocks this
+one.
 
 ## What is here
 
