@@ -52,7 +52,7 @@ role records it read.
     claude plugin marketplace add tokenmaxxxer/reflect-agent-rulebook
     claude plugin install reflect@tokenmaxxxer-reflect
 
-muster installs it per role alongside the core marketplace; `install.sh`
+on-the-record installs it per role alongside the core marketplace; `install.sh`
 does the same by hand. Kill switch: `REFLECT_CYCLE_OFF=1`.
 
 ## Run the checks
