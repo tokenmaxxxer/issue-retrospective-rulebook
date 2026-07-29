@@ -1,6 +1,6 @@
 ---
-loop_state: in-progress
-code_under_review: PENDING (will be filled with final commit sha)
+loop_state: landed
+code_under_review: 1a5e8df
 ---
 
 ## What was done
@@ -31,20 +31,12 @@ in README.md line 55 to 'on-the-record'.
 
 ## closed_checks
 
-- Post-edit grep check: `grep -n muster README.md` after the edit no longer
-  matches the line-55 prose mention. Commit sha: PENDING.
+- Post-edit grep check: `grep -n muster README.md` after the edit exits 1
+  (no matches) — the line-55 prose mention is gone. Commit sha: 1a5e8df.
 
 ## Open findings
 
 none
-
-## Next steps
-
-- Commit README.md and this record.
-- Update code_under_review to the final commit sha (resolution path: a
-  follow-up commit updating this record once the sha is known).
-- Push to origin issue-5/coding.
-- Set loop_state to landed once pushed.
 
 ## What did not work
 
