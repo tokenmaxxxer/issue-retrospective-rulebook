@@ -2,6 +2,20 @@
 
 Phase 1 only. No execution in this PR; Phase 2 opens on Approve.
 
+**Revision note (per approver FEEDBACK on PR #19):** the prior revision of
+this proposal expressed enforcement as one monolithic `methodology-gate.sh`
+script. The approver required a **plugin-set** model instead: one adopted
+methodology = one independent plugin (not one script with many checks
+inside it); freelunch completeness (기획서·산출물의 "완성도") is itself one
+of those plugins, not a property folded into the others; and the
+기획서(proposal)/산출물(record) write-surface norms are each expressed as a
+**combination of plugins**, not a single rule that owns every check. This
+revision restructures (b) around that model and adds the required
+**Plugin List** section (§ below) naming every plugin, the methodology it
+owns, its components, and how it composes with the others. Section (a)
+(directive deepening) and (d) (checklist) are unchanged in substance;
+section (c) (tests) is re-scoped to per-plugin test files.
+
 ## Inputs read
 
 - This repo: `reflect/hooks/{directive.sh,hooks.json}`,
@@ -96,108 +110,127 @@ prohibitions named separately, not folded into one sentence each:
 3. Round-end value gates (already named): stated here as a two-question
    checklist, not a single clause — see (d) for the checklist artifact.
 
-## (b) Methodology gate — mechanical verification, role-owned
+## (b) Methodology enforcement — a plugin set, not one gate
 
-**New file (phase 2 builds it): `reflect/hooks/methodology-gate.sh`.**
-`PreToolUse` gate for `Write|Edit|MultiEdit`, additive to (never replacing)
-core's generic `record-fields-gate.sh` — mirrors
-`pricing-rulebook/pricing/hooks/methodology-gate.sh`'s structure exactly
-(scout brief, must-bes), adapted to this role's own elements:
+Per approver FEEDBACK: no single script owns every check. Each adopted
+methodology becomes its **own independent plugin** — a small, separately
+named `PreToolUse` gate script with its own kill switch, its own test
+file, and its own single-fact responsibility. Freelunch completeness
+(기획서·산출물의 완성도 — inputs-named, synthesis-present,
+adopted-norms-with-rationale) is **one plugin among these**, not a
+property smuggled into the others. The 기획서(proposal) and 산출물(record)
+write surfaces are each governed by a **combination** of plugins wired
+into `hooks.json`, not by one monolithic script that special-cases both
+surfaces internally.
 
-- **Write surfaces** (regex-scoped, everything else passes through
-  untouched): `docs/issue-<n>/proposals/.*issue-retrospective.*\.md` and
-  `docs/issue-<n>/reports/issue-retrospective\.md`.
-- **Resulting-content reconstruction** for Write/Edit/MultiEdit
-  (pricing's exact technique); fail-closed deny when the tool shape makes
-  the result undeterminable.
-- **Required elements checked on the record surface** (keyword/phrase
-  presence, one deny message naming every missing element):
-  1. `timeline` (a Timeline section heading or the word, case-insensitive).
-  2. Contributing-factors language present AND the phrase "root cause"
-     (singular, not "factors") absent — this is the one check pricing's
-     pattern has no analogue for (pricing has no "never say X" negative
-     check); implemented as: deny if `"root cause"` appears without
-     `"factors"` appearing in the same section, OR if neither
-     "contributing factor(s)" nor "factors" appears at all.
-  3. Recurred-prediction language present ("recurred", "predicted", or an
-     explicit "no earlier record" statement) — a record that never
-     mentions the recurred-prediction question at all is denied; one that
-     mentions it and answers "none" (issue #12's own record did exactly
-     this) passes.
-  4. If an action item is claimed (heuristic: an "action items" /
-     "what changes" section with non-empty, non-"none" content), an owner
-     token and a checkable-change phrasing must be present; a section
-     that explicitly states "none" / "no action items" passes without
-     further checks (mirrors pricing's `exited_early` early-exit pattern).
-- **Required elements checked on the proposal surface**: input records
-  named (a `docs/issue-` path or a record filename token present); a
-  synthesis section distinct from a raw paste (heuristic: presence of a
-  "found"/"synthesis" heading, not just a record's own section headers
-  reproduced verbatim); adopted-norms-with-rationale section present.
-- **Order constraint** (state via file-read, not a new persistent state
-  file — scout brief's adopted pattern from `coding-progress-gate.sh`):
-  before the phase-2 record write is allowed to pass the required-elements
-  check, the gate additionally requires that this subject's own phase-1
-  proposal (`docs/issue-<n>/proposals/*issue-retrospective*.md`, already
-  on disk by the time phase 2 starts, per contract v3 s19's Approve gate)
-  names both a survey path and either a scout-brief path or an explicit
-  scout-skip statement — reading that file directly at gate time, the
-  same way `coding-progress-gate.sh` reads `verify.md` directly, rather
-  than introducing a separate state file this repo would then have to
-  keep in sync.
-- **Fail-closed `__fc` trap-at-top**, on every code path, matching every
-  other gate in this ecosystem.
-- **Kill switch**: `ISSUE_RETROSPECTIVE_METHODOLOGY_GATE_OFF=1` (role
-  token `issue-retrospective`, uppercased+underscored per
-  `role-directive.sh`'s own `tr` convention).
-- **`hooks.json` addition**: one `PreToolUse` entry pointing at the new
-  file, alongside the existing `SessionStart` entry for `directive.sh`.
-- **Canon-reference statement (required by `canon-scripts.md`, survey
-  §4)**: this gate is role-owned by design, not a fork of any core-canon
-  file — its required-element list (timeline / contributing-factors /
-  recurred-prediction / action-item shape) is retrospective-methodology
-  content core issue #66 does not and should not own, the same way
-  pricing's six-element list is pricing-specific. It is not on
-  `stub-check.sh`'s canon manifest and does not need to be; `stub-check.sh`
-  itself is copied verbatim from core per its own header and is
-  unaffected.
+All plugins share one mechanical shape (adapted from
+`pricing-rulebook/pricing/hooks/methodology-gate.sh`'s technique, scout
+brief must-bes): resulting-content reconstruction for
+`Write|Edit|MultiEdit`, fail-closed `__fc` trap-at-top, a per-plugin kill
+switch (`ISSUE_RETROSPECTIVE_<PLUGIN>_GATE_OFF=1`, uppercased+underscored
+per `role-directive.sh`'s `tr` convention), and one `hooks.json`
+`PreToolUse` entry each — additive to (never replacing) core's generic
+`record-fields-gate.sh`.
 
-## (c) Gate tests
+**New directory (phase 2 builds it): `reflect/hooks/plugins/`**, one file
+per plugin (see Plugin List below for the exact file names). Each plugin
+is independently deployable and independently disable-able: removing one
+plugin's `hooks.json` entry does not affect any other plugin's checks —
+this is the load-bearing difference from the prior single-script design,
+where every check shared one kill switch and one file.
 
-**New file (phase 2 builds it): `tests/methodology-gate-tests.sh`**, run
-from the same harness `stub-check.sh`/`parse-check.sh`/`deny-only-check.sh`
-already use (repo-root `tests/`), using
-`implementation-rulebook/tests/run-gate-tests.sh`'s exact scaffold
-(`run()`/`report()`, scratch `git init` per case, synthetic PreToolUse
-JSON piped on stdin, assert exit 0/2 against the real script file):
+**Order constraint**, unchanged in substance from the prior draft but now
+owned by its own plugin (`proposal-order-gate.sh`, see Plugin List): state
+via direct file-read of the subject's own phase-1 proposal (adopted
+pattern from `coding-progress-gate.sh`, scout brief must-be 5) — no new
+persistent state file.
 
-Planned cases (allow/deny pairs, phase 2 fills in exact fixture text):
-1. Record with all five components in order → allow.
-2. Record missing Timeline → deny, message names `timeline`.
-3. Record with "root cause" and no "factors" language → deny, message
-   names the contributing-factors facet.
-4. Record with contributing-factors language present and no "root cause"
-   phrase → allow (negative check does not false-positive on a compliant
-   record).
-5. Record with no recurred-prediction mention at all → deny.
-6. Record stating "no recurred prediction — no earlier record existed" →
-   allow (issue #12's own record, used as the literal fixture text).
-7. Record claiming an action item with no owner named → deny.
-8. Record stating "no action items" → allow, no further action-item
-   checks fire.
-9. Record whose own proposal (fixture, written into the scratch repo
-   first) never names a survey path → deny (order constraint).
-10. Proposal write missing an inputs-read section → deny.
-11. Write to a foreign role's record path (e.g. `docs/issue-7/reports/coding.md`)
-    → allow untouched (write surface scoping, mirrors pricing's own
-    `foreign-path` case in `run-gate-tests.sh`).
-12. `ISSUE_RETROSPECTIVE_METHODOLOGY_GATE_OFF=1` set → allow regardless of
-    content (kill switch).
+**Canon-reference statement (required by `canon-scripts.md`, survey
+§4)**: every plugin in this set is role-owned by design, not a fork of
+any core-canon file — none of the required-element lists (timeline /
+contributing-factors / recurred-prediction / action-item shape /
+freelunch completeness / phase ordering) is content core issue #66 does
+or should own, the same way pricing's six-element list is
+pricing-specific. None of the plugin files is on `stub-check.sh`'s canon
+manifest and none needs to be; `stub-check.sh` itself stays copied
+verbatim from core per its own header and is unaffected by adding a
+`plugins/` subdirectory alongside it.
 
-`tests/stub-check.sh` is unaffected (new file's name is not on the canon
-manifest); `tests/parse-check.sh` will parse the new file automatically
-(it already walks `reflect/hooks/*.sh` recursively) — no change needed to
-either existing harness script.
+## Plugin List (required)
+
+| # | Plugin (file, `reflect/hooks/plugins/`) | Methodology owned | Components checked | Composes into |
+|---|---|---|---|---|
+| 1 | `timeline-order-gate.sh` | Timeline-first ordering (issue #12 record norm) | Timeline section/keyword present; no causal-claim language precedes it | 산출물 combination |
+| 2 | `contributing-factors-gate.sh` | Plural structural causation, no singular attribution | "contributing factor(s)"/"factors" present; "root cause" absent unless co-occurring with "factors" | 산출물 combination |
+| 3 | `recurred-prediction-gate.sh` | Recurred-prediction question must be answered | "recurred"/"predicted" language, or an explicit "no earlier record" statement, present | 산출물 combination |
+| 4 | `action-item-shape-gate.sh` | Action items, when claimed, are owned + checkable | If a non-"none" action-items section exists: owner token + checkable-change phrasing present | 산출물 combination |
+| 5 | `freelunch-completeness-gate.sh` | Freelunch completeness (기획서·산출물 공통 "완성도" 방법론) | Inputs-read paths named; a synthesis section distinct from raw paste; adopted-norms-with-rationale section present | Both 기획서 and 산출물 combinations |
+| 6 | `proposal-order-gate.sh` | Phase ordering (phase-1-before-phase-2, contract v3 s19) | Subject's own phase-1 proposal, read directly, names a survey path and a scout-brief path or explicit scout-skip | 기획서 combination (guards the phase-2 record write) |
+
+**Write-surface combinations (how the plugins compose):**
+
+- **기획서 (proposal) surface** —
+  `docs/issue-<n>/proposals/.*issue-retrospective.*\.md`:
+  plugin 5 (`freelunch-completeness-gate.sh`) alone. Ordering (plugin 6)
+  does not apply here — it guards the *next* surface, not this one.
+- **산출물 (record) surface** —
+  `docs/issue-<n>/reports/issue-retrospective\.md`:
+  plugins 1 + 2 + 3 + 4 + 5 + 6, all wired to the same write surface in
+  `hooks.json`, each independently deny-capable. A write is denied if
+  *any* plugin in the combination denies it; each plugin's deny message
+  is scoped to only the facet it owns (no plugin references another
+  plugin's facet in its message).
+
+This replaces the prior draft's single `methodology-gate.sh` with six
+independent files; no plugin's logic depends on another plugin's file
+being present (each does its own resulting-content reconstruction), so
+the write-surface combinations above are wiring in `hooks.json`, not
+shared code.
+
+## (c) Plugin tests
+
+**New directory (phase 2 builds it): `tests/plugins/`**, one test file
+per plugin, mirroring the plugin's own name (e.g.
+`tests/plugins/timeline-order-gate-tests.sh`), run from the same harness
+`stub-check.sh`/`parse-check.sh`/`deny-only-check.sh` already use
+(repo-root `tests/`), using `implementation-rulebook/tests/run-gate-tests.sh`'s
+exact scaffold (`run()`/`report()`, scratch `git init` per case, synthetic
+PreToolUse JSON piped on stdin, assert exit 0/2 against the real plugin
+file). One file per plugin keeps a plugin's tests independently runnable
+and independently deletable if a plugin is later dropped from the set.
+
+Planned cases by plugin (allow/deny pairs, phase 2 fills in exact fixture
+text):
+1. `timeline-order-gate.sh`: record with Timeline present and first →
+   allow; Timeline missing → deny; a causal claim before Timeline → deny.
+2. `contributing-factors-gate.sh`: "root cause" with no "factors" → deny;
+   "contributing factor(s)"/"factors" present, no "root cause" → allow;
+   neither present → deny.
+3. `recurred-prediction-gate.sh`: no mention at all → deny; "no earlier
+   record existed" (issue #12's own record, literal fixture) → allow.
+4. `action-item-shape-gate.sh`: action item claimed with no owner → deny;
+   "no action items" → allow, no further checks fire.
+5. `freelunch-completeness-gate.sh`: proposal missing inputs-read section
+   → deny; missing synthesis section → deny; all three elements present
+   → allow — run once against the 기획서 fixture and once against the
+   산출물 fixture, since this plugin guards both surfaces.
+6. `proposal-order-gate.sh`: subject's own proposal (fixture, written
+   into the scratch repo first) never names a survey path → deny; names
+   survey + explicit scout-skip → allow.
+7. Cross-plugin: write to a foreign role's record path (e.g.
+   `docs/issue-7/reports/coding.md`) → every plugin allows it untouched
+   (write-surface scoping, mirrors pricing's own `foreign-path` case).
+8. Cross-plugin: each plugin's own
+   `ISSUE_RETROSPECTIVE_<PLUGIN>_GATE_OFF=1` set → that plugin allows
+   regardless of content, while the other five plugins in the same
+   combination still enforce (proves independence — this is the case
+   that could not exist under the prior single-script design, where one
+   kill switch disabled every check at once).
+
+`tests/stub-check.sh` is unaffected (no plugin file's name is on the canon
+manifest); `tests/parse-check.sh` will parse every new plugin file
+automatically (it already walks `reflect/hooks/**/*.sh` recursively) — no
+change needed to either existing harness script.
 
 ## (d) Agents/checklist
 
@@ -226,16 +259,31 @@ sub-agent for its methodology enforcement either.
   wording ("facet별 실행 가능한 수준," "한 줄 요약 금지"); no fork of
   `role-directive.sh` needed since the deepening lives inside the existing
   slot strings, not a new call signature.
-- Gate shape: adopted wholesale from `pricing-rulebook/methodology-gate.sh`
-  (scout brief must-bes 1-4, judge point 1) — the issue names this file
-  explicitly as the bar to meet.
-- Order constraint via direct file-read, no new state file: adopted from
-  `coding-progress-gate.sh`'s pattern (scout brief must-be 5, adopt/skip);
-  a dedicated persistent state file was considered and explicitly skipped
-  (scout brief adopt/skip) since the one ordering fact needed is already
-  on disk.
+- Per-plugin gate mechanics: adopted wholesale from
+  `pricing-rulebook/methodology-gate.sh`'s technique (scout brief must-bes
+  1-4, judge point 1) — the issue names this file explicitly as the bar
+  to meet; the *decomposition into six files* is new in this revision,
+  per approver FEEDBACK requiring one methodology = one independent
+  plugin rather than one script owning every check.
+- Freelunch completeness as its own plugin, not a folded-in property: per
+  approver FEEDBACK explicitly — 완성도 (inputs-named, synthesis-present,
+  adopted-norms-with-rationale) is `freelunch-completeness-gate.sh`, wired
+  into both the 기획서 and 산출물 combinations rather than duplicated as
+  ad-hoc checks inside each surface's own logic.
+- 기획서/산출물 norms as plugin combinations, not one rule: per approver
+  FEEDBACK — the Plugin List's "Composes into" column and the
+  write-surface combinations subsection are the explicit mapping from
+  surface to plugin set, replacing the prior draft's single script that
+  branched internally on which surface it was called against.
+- Order constraint via direct file-read, no new state file, now its own
+  plugin (`proposal-order-gate.sh`): adopted from `coding-progress-gate.sh`'s
+  pattern (scout brief must-be 5, adopt/skip); a dedicated persistent
+  state file was considered and explicitly skipped (scout brief
+  adopt/skip) since the one ordering fact needed is already on disk.
 - Test harness shape: adopted from `run-gate-tests.sh` verbatim structure
-  (scout brief must-be 6).
+  (scout brief must-be 6), now one test file per plugin so a plugin's
+  tests travel with it if the plugin is later added to or dropped from
+  the set.
 - Checklist over agent for round-end value gates: no reference
   implementation in this ecosystem uses a dedicated checklist file or
   sub-agent for methodology enforcement (scout brief gap line); the one
@@ -252,3 +300,11 @@ accepted as the same class of limitation pricing's own gate already
 lives with (all six of its checks are keyword/phrase heuristics, not
 semantic parses); flag here if the approver wants a stricter phase-2
 design before Approve.
+
+One added judgment call from this revision: six independent plugin files
+means six kill switches and six small scripts instead of one — more
+files to keep in sync with `hooks.json`, traded for the independence
+(disable/replace one methodology's check without touching the others)
+the approver's FEEDBACK specifically asked for. Flag here if the
+approver would rather cap the plugin count (e.g. merge 1-4 into one
+"record-shape" plugin while keeping 5-6 separate) before Approve.
