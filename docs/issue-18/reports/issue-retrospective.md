@@ -24,25 +24,41 @@ plugin set the revised proposal named:
 - Deepened `reflect/hooks/directive.sh`'s `use_when`/`produces` slots into
   explicit phase/step/judgment-criterion/prohibition structure (proposal
   (a)).
-- Six independent gate scripts under `reflect/hooks/plugins/`:
-  `timeline-order-gate.sh`, `contributing-factors-gate.sh`,
-  `recurred-prediction-gate.sh`, `action-item-shape-gate.sh`,
-  `freelunch-completeness-gate.sh`, `proposal-order-gate.sh` — each with
-  its own fail-closed trap, its own `ISSUE_RETROSPECTIVE_<PLUGIN>_GATE_OFF`
-  kill switch, and its own single-fact responsibility (proposal (b)).
-  Wired into `reflect/hooks/hooks.json`'s `PreToolUse` matcher, additive to
-  core's generic `record-fields-gate.sh`.
-- Six matching test files under `tests/plugins/` (one per plugin, `run()`
-  scaffold adapted from `implementation-rulebook/tests/run-gate-tests.sh`),
-  covering each plugin's own allow/deny cases plus a foreign-path case and
-  a kill-switch-independence case per plugin.
+- Six **independently installable plugins** at repo root —
+  `timeline-order-gate/`, `contributing-factors-gate/`,
+  `recurred-prediction-gate/`, `action-item-shape-gate/`,
+  `freelunch-completeness-gate/`, `proposal-order-gate/` — each its own
+  `.claude-plugin/plugin.json`, its own `hooks/hooks.json` `PreToolUse`
+  entry, its own fail-closed trap, its own
+  `ISSUE_RETROSPECTIVE_<PLUGIN>_GATE_OFF` kill switch, its own test file
+  (`hooks/<name>-tests.sh`), and its own single-fact responsibility
+  (proposal (b)). Each registered as its own entry in
+  `.claude-plugin/marketplace.json` alongside `reflect`, additive to core's
+  generic `record-fields-gate.sh`. **Corrected structurally per approver
+  FEEDBACK on PR #20** (posted after this session's first Phase-2 pass,
+  which had wired the six gates as `reflect/hooks/plugins/*.sh` inside the
+  `reflect` plugin itself, sharing `reflect`'s `hooks.json` and its single
+  install unit — not the six-independent-plugin shape the approved
+  proposal actually specified): the gates and their tests were relocated
+  out of `reflect/`, `reflect/hooks/hooks.json` was reduced back to only
+  its `SessionStart` `directive.sh` entry, and `install.sh` was updated to
+  install all seven plugins (`reflect` + the six gates) from
+  `tokenmaxxxer-reflect`.
+- `install.sh` installs the full seven-plugin stack (`reflect` +
+  `timeline-order-gate`, `contributing-factors-gate`,
+  `recurred-prediction-gate`, `action-item-shape-gate`,
+  `freelunch-completeness-gate`, `proposal-order-gate`) via one
+  `ALL_PLUGINS` list, both for the CLI path and the CLI-less
+  settings-write fallback.
 - `docs/handbooks/round-end-value-gates.md`, the two-question checklist
   proposal (d) chose over a dedicated agent (no sibling rulebook uses one
   for methodology enforcement; the round-end questions are judgment calls a
   keyword gate cannot verify).
 
-This record is itself the first write to be checked by all six plugins,
-and by `proposal-order-gate.sh` against this issue's own phase-1 proposal.
+This record is itself the write surface all six independent plugins guard
+(via their own `hooks/hooks.json` `PreToolUse` entries once installed),
+including `proposal-order-gate.sh` against this issue's own phase-1
+proposal.
 
 ## Why
 
@@ -66,6 +82,8 @@ instead of one.
   `5a564c2`)
 - Issue #18 comments: approver FEEDBACK (plugin-set requirement) and
   `APPROVE issue-18/issue-retrospective`
+- PR #20 comment: approver FEEDBACK (structural verification — six
+  independent plugins required, not `reflect/hooks/plugins/*.sh`)
 - `docs/specs/approvers.md` (confirms `JiwonJung94` listed)
 - `docs/issue-12/reports/issue-retrospective.md` and
   `docs/issue-12/proposals/issue-retrospective.md` (the record norms this
@@ -92,10 +110,22 @@ Reconstructed from the records above and PR/issue history only:
    compose into.
 4. Approver posted `APPROVE issue-18/issue-retrospective` on the issue —
    single-account mode, opening phase 2.
-5. Phase 2 (this session): `directive.sh` deepened per-phase/per-step; six
-   plugin gate scripts and six matching test files written and run green;
-   `hooks.json` wired; `docs/handbooks/round-end-value-gates.md` added;
-   this record written as phase 2's first act.
+5. Phase 2, first pass: `directive.sh` deepened per-phase/per-step; six
+   gate scripts and six matching test files written and run green, but
+   wired inside `reflect/hooks/plugins/` and `reflect/hooks/hooks.json` —
+   one shared install unit, not six; `docs/handbooks/round-end-value-gates.md`
+   added; this record written as phase 2's first act.
+6. Approver posted FEEDBACK on PR #20 (structural verification): the six
+   gates must be six independent plugins (own `plugin.json`, own
+   marketplace registration, own install unit), per the approved
+   proposal's Plugin List — not role-internal files. Phase 2, second pass
+   (this session): the six gates and their tests relocated to
+   `<plugin>/.claude-plugin/plugin.json` + `<plugin>/hooks/{hooks.json,
+   <name>.sh,<name>-tests.sh}` at repo root; `reflect/hooks/hooks.json`
+   reduced to its `SessionStart` entry only; `.claude-plugin/marketplace.json`
+   and `install.sh` updated to register/install all seven plugins; all
+   six plugin test suites (34 cases) re-run green against the new paths;
+   this record updated as the same phase-2 act, on the same branch/PR.
 
 ## Contributing factors
 

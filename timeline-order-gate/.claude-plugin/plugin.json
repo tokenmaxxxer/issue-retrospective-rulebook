@@ -1,0 +1,7 @@
+{
+  "name": "timeline-order-gate",
+  "description": "PreToolUse gate for reflect's issue-retrospective record: the Timeline section must be present and no causal-claim language may precede it (issue #12 record norm; issue #18 plugin-set design).",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}

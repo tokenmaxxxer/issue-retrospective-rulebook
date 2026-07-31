@@ -16,6 +16,7 @@ set -euo pipefail
 
 MARKET="tokenmaxxxer-reflect"
 BUNDLE="reflect"
+ALL_PLUGINS=(reflect timeline-order-gate contributing-factors-gate recurred-prediction-gate action-item-shape-gate freelunch-completeness-gate proposal-order-gate)
 GITHUB_REPO="tokenmaxxxer/reflect-agent-rulebook"
 
 usage() {
@@ -51,11 +52,12 @@ SETTINGS_SOURCE_JSON="{\"source\": \"github\", \"repo\": \"$GITHUB_REPO\"}"
 # settings, abort leaving the original file untouched; back up before
 # writing; follow symlinks rather than replacing them.
 write_settings() {
-  python3 - "$MARKET" "$BUNDLE" "$SETTINGS_SOURCE_JSON" "$1" <<'PY'
+  python3 - "$MARKET" "$SETTINGS_SOURCE_JSON" "$1" "${ALL_PLUGINS[@]}" <<'PY'
 import json, os, shutil, sys
 
-market, bundle, source_json, path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-key = f"{bundle}@{market}"
+market, source_json, path = sys.argv[1], sys.argv[2], sys.argv[3]
+bundles = sys.argv[4:]
+keys = [f"{b}@{market}" for b in bundles]
 
 home = os.path.realpath(os.path.expanduser("~"))
 path = os.path.expanduser(path)
@@ -96,7 +98,8 @@ if isinstance(enabled, list):
     enabled = {k: True for k in enabled}
 elif not isinstance(enabled, dict):
     enabled = {}
-enabled[key] = True
+for key in keys:
+    enabled[key] = True
 settings["enabledPlugins"] = enabled
 
 tmp = path + ".tmp"
@@ -136,22 +139,20 @@ if [ -n "$CLI" ] && [ -x "$CLI" ]; then
   "$CLI" plugin marketplace update "$MARKET" >/dev/null 2>&1 || true
 
   install_failed=""
-  for plugin in reflect; do
+  for plugin in "${ALL_PLUGINS[@]}"; do
     "$CLI" plugin install "$plugin@$MARKET" --scope user || install_failed="$install_failed $plugin"
   done
-  "$CLI" plugin install "$BUNDLE@$MARKET" --scope user || install_failed="$install_failed $BUNDLE"
 
-  for plugin in reflect; do
+  for plugin in "${ALL_PLUGINS[@]}"; do
     "$CLI" plugin update "$plugin@$MARKET" || true
   done
-  "$CLI" plugin update "$BUNDLE@$MARKET" || true
 
   if [ -n "$install_failed" ]; then
     echo "==> FAILED to install:$install_failed"
     echo "    The rest of the stack is installed. Re-run this script — it is idempotent —"
     echo "    or install the failures individually with: $CLI plugin install <name>@$MARKET --scope user"
   else
-    echo "==> installed $BUNDLE@$MARKET and the full stack."
+    echo "==> installed the full stack ($MARKET: ${ALL_PLUGINS[*]})."
   fi
 else
   echo "==> no claude CLI found (standalone or bundled): writing user settings directly"
