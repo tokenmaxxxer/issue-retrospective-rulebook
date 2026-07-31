@@ -20,24 +20,24 @@ it never blocks this one.
 
 ## What is here
 
-    reflect/hooks/directive.sh          SessionStart — the role's four facets:
+    reflect/hooks/directive.sh          SessionStart — a core-canon stub
+                                        (sources core/hooks/lib/role-directive.sh)
+                                        carrying the role's four facets:
                                         research (exemplar retros; recurred
                                         predictions), survey (records-only),
                                         proposal (named inputs), judgment
                                         (round-end value gates, advisory-only)
-    reflect/hooks/record-fields-gate.sh contract s20 minimum content + open-work
-                                        backlog/resolution-path on the record
-    reflect/hooks/trailer-gate.sh       commits staging docs/issue-<n>/** carry
-                                        `Subject: issue-<n>`; one commit, one
-                                        subject; inline -m only
-    reflect/hooks/handbook-trigger-gate.sh  s21 same-turn handbook sync
     tests/                              repo-level checks (never installed
-                                        into a session): run-gate-tests.sh,
+                                        into a session): stub-check.sh,
                                         parse-check.sh, deny-only-check.sh
 
 Everything that used to live here for coordination — the state machine and
 its injection, path ownership, docs-bucket layout, the per-repo contract
 copy — is deleted: core's board-gate and approval-gate own all of it now.
+The three role-agnostic gates (trailer-gate.sh, record-fields-gate.sh,
+handbook-trigger-gate.sh) are core canon too (core issue #66): core's own
+`hooks.json` fires them for every plugin install, so this rulebook no
+longer vendors copies or registers them itself.
 
 ## Record vocabulary
 
@@ -57,5 +57,5 @@ does the same by hand. Kill switch: `REFLECT_CYCLE_OFF=1`.
 ## Run the checks
 
     /bin/bash tests/parse-check.sh
-    /bin/bash tests/run-gate-tests.sh
+    /bin/bash tests/stub-check.sh reflect
     /bin/bash tests/deny-only-check.sh
