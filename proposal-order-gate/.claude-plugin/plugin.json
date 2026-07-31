@@ -1,0 +1,7 @@
+{
+  "name": "proposal-order-gate",
+  "description": "PreToolUse gate for reflect's issue-retrospective record write: refuses it unless the subject's own phase-1 proposal already exists on disk and names a survey path plus a scout-brief path or an explicit scout-skip (contract v3 s19; issue #18 plugin-set design).",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "recurred-prediction-gate",
+  "description": "PreToolUse gate for reflect's issue-retrospective record: 'What we learned' must explicitly answer whether an earlier reflect record predicted a failure mode that recurred here, even when the answer is 'no earlier record existed' (issue #12 record norm; issue #18 plugin-set design).",
+  "author": {
+    "name": "Jung Jiwon & Lee Jongkwan"
+  }
+}
