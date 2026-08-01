@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-__fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate aborted (rc=$rc)" >&2; exit 2; fi; }
-trap __fc EXIT
+. "${CLAUDE_PLUGIN_ROOT_CORE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../core" && pwd -P)}/hooks/lib/gate-lib.sh"
+gate_trap_fail_closed
 # PreToolUse gate (Write|Edit|MultiEdit) -- one plugin, one methodology
 # (issue #18 plugin-set design; adapted from
 # pricing-rulebook/pricing/hooks/methodology-gate.sh's technique).
@@ -8,7 +8,10 @@ trap __fc EXIT
 # Owns: the recurred-prediction question must be answered. A reflect
 # record's "What we learned" section must say whether an earlier reflect
 # record predicted a failure mode that recurred in THIS issue -- including
-# the explicit case where no earlier record existed.
+# the explicit case where no earlier record existed. Section-scoped (issue
+# #21): the "recurred"/"predicted" trigger words must appear inside the
+# "What we learned" section itself; the "no earlier record..." phrase is
+# still honored anywhere in the document.
 #
 # Write surface: docs/issue-<n>/reports/issue-retrospective.md only (the
 # 산출물/record surface). Additive to (never replacing) core's generic
@@ -18,12 +21,9 @@ trap __fc EXIT
 set -uo pipefail
 
 role="${CLAUDE_ROLE:-reflect}"
-deny() { echo "${role}: refused — $1" >&2; exit 2; }
+deny() { gate_deny "$role" "$1"; }
 
-case "${ISSUE_RETROSPECTIVE_RECURRED_PREDICTION_GATE_OFF:-}" in
-  ""|0|false|no|off) ;;
-  *) exit 0 ;;
-esac
+gate_kill_switch_active "${ISSUE_RETROSPECTIVE_RECURRED_PREDICTION_GATE_OFF:-}" || { trap - EXIT; exit 0; }
 
 command -v python3 >/dev/null 2>&1 || deny "recurred-prediction-gate.sh requires python3, which is not on PATH; denying rather than guessing."
 
@@ -70,35 +70,25 @@ PG_PAYLOAD="$payload" PG_ROOT="$root" \
 python3 <<'PY'
 import sys as _fc_sys  # fail-closed-on-internal-error
 try:
-    import json, os, posixpath, re, sys
+    import json, os, re, sys, importlib.util
+
+    _spec = importlib.util.spec_from_file_location("gate_lib", os.environ["GATE_LIB_PY"])
+    gate_lib = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(gate_lib)
 
     def deny(m):
         sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
-    try:
-        ev = json.loads(raw) if raw else {}
-    except ValueError:
-        deny("the tool-call payload is not valid JSON; the gate cannot judge the recurred-prediction question on an unparseable write.")
-    if not isinstance(ev, dict):
-        deny("the tool-call payload is not a JSON object; failing closed on the recurred-prediction question.")
+    ev = gate_lib.gate_parse_json_or_deny(raw, deny)
 
     tool = ev.get("tool_name")
     ti = ev.get("tool_input")
     if not isinstance(ti, dict):
         deny("tool_input is missing or not a JSON object; the gate cannot judge a write it cannot parse (recurred-prediction).")
 
-    root = posixpath.normpath(os.environ["PG_ROOT"].replace("\\", "/"))
+    root = os.environ["PG_ROOT"]
     RECORD_RE = re.compile(r'^docs/issue-[0-9]+/reports/issue-retrospective\.md$')
-
-    def resolve(p):
-        n = p.replace("\\", "/")
-        a = n if posixpath.isabs(n) else posixpath.join(root, n)
-        a = posixpath.normpath(a)
-        try:
-            return posixpath.normpath(os.path.realpath(a).replace("\\", "/"))
-        except OSError:
-            return a
 
     path = None
     if tool in ("Write", "Edit", "MultiEdit"):
@@ -108,13 +98,13 @@ try:
     if path is None:
         sys.exit(0)
 
-    r = resolve(path)
-    if not r.startswith(root + "/"):
+    rel = gate_lib.gate_normalize_path(root, path)
+    if rel is None:
         sys.exit(0)
-    rel = r[len(root):].lstrip("/")
     if not RECORD_RE.match(rel):
         sys.exit(0)  # not the record write surface — not this plugin's business
 
+    r = os.path.join(root, rel)
     current = None
     if os.path.isfile(r):
         try:
@@ -123,31 +113,8 @@ try:
         except OSError:
             deny("%s exists but cannot be read; failing closed on the recurred-prediction question." % rel)
 
-    new_text = None
-    if tool == "Write":
-        c = ti.get("content")
-        if isinstance(c, str):
-            new_text = c
-    elif tool == "Edit":
-        o, n = ti.get("old_string"), ti.get("new_string")
-        if isinstance(o, str) and isinstance(n, str) and current is not None and o in current:
-            new_text = current.replace(o, n, 1)
-    elif tool == "MultiEdit":
-        edits = ti.get("edits")
-        text = current
-        if isinstance(edits, list) and text is not None:
-            ok = True
-            for e in edits:
-                if not isinstance(e, dict):
-                    ok = False; break
-                o, n = e.get("old_string"), e.get("new_string")
-                if not isinstance(o, str) or not isinstance(n, str) or o not in text:
-                    ok = False; break
-                text = text.replace(o, n, 1)
-            if ok:
-                new_text = text
-
-    if new_text is None:
+    new_text, ok = gate_lib.gate_reconstruct_write(tool, ti, current)
+    if not ok:
         deny(
             "this write targets %s but the gate cannot determine the resulting content "
             "from the tool input (tool=%r). Write the full document with Write, or use an "
@@ -155,10 +122,29 @@ try:
             "be checked." % (rel, tool)
         )
 
-    low = new_text.lower()
-    answered = bool(re.search(r'\brecurred\b|\bpredicted\b', low)) or bool(
-        re.search(r'no earlier (reflect )?record (existed|exists)', low)
-    )
+    # Section-scoped (issue #21): anchor on the "What we learned" heading
+    # and check the trigger words only within that section's body — a
+    # stray "recurred"/"predicted" elsewhere in the document no longer
+    # satisfies this check. The "no earlier record..." phrase is still
+    # honored document-wide (it may legitimately sit outside a heading in
+    # a short record).
+    m = re.search(r'(?im)^\s*#{1,6}\s*what we learned\b', new_text)
+    if not m:
+        deny(
+            "reflect record at %s has no 'What we learned' section. Per issue #12's "
+            "record norm, the record body must contain a 'What we learned' section "
+            "answering the recurred-prediction question." % rel
+        )
+    rest = new_text[m.end():]
+    next_heading = re.search(r'(?m)^\s*#{1,6}\s', rest)
+    section = rest[: next_heading.start()] if next_heading else rest
+    low_section = section.lower()
+    low_doc = new_text.lower()
+
+    in_section = bool(re.search(r'\brecurred\b|\bpredicted\b', low_section))
+    no_earlier_anywhere = bool(re.search(r'no earlier (reflect )?record (existed|exists)', low_doc))
+    answered = in_section or no_earlier_anywhere
+
     if not answered:
         deny(
             "reflect record at %s does not answer the recurred-prediction question. Per "
