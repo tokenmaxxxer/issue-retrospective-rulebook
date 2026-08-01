@@ -132,5 +132,8 @@ GENUINE_NO_ROOT='## Contributing factors
 Several structural factors combined to cause this: A, B, and C.'
 runcase allow genuine-factors-no-root-cause-happy-path "$REC" "$GENUINE_NO_ROOT"
 
+# --- mandatory case: missing core (core #75 source guard) fails closed ----
+runcase deny missing-core-source-guard "$REC" "$FACTORS_ONLY" CLAUDE_PLUGIN_ROOT_CORE=/nonexistent/core
+
 printf '\n== %d passed, %d failed ==\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
