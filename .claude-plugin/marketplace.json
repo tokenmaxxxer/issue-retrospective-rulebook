@@ -1,43 +1,43 @@
 {
-  "name": "tokenmaxxxer-reflect",
+  "name": "tokenmaxxxer-issue-retrospective",
   "owner": {
     "name": "Jung Jiwon & Lee Jongkwan"
   },
   "plugins": [
     {
-      "name": "reflect",
-      "source": "./reflect",
-      "description": "The reflect role on contract v3: the retrospective for an issue, built from the subject's other role records only. Directive carries the four facets (exemplar retros + recurred-prediction research, records-only survey, named-inputs proposal, round-end value gates + advisory-only findings); gates enforce the record's required fields and the Subject: issue-<n> trailer."
+      "name": "issue-retrospective",
+      "source": "./issue-retrospective",
+      "description": "The issue-retrospective role on contract v3: the retrospective for an issue, built from the subject's other role records only. Directive carries the four facets (exemplar retros + recurred-prediction research, records-only survey, named-inputs proposal, round-end value gates + advisory-only findings); gates enforce the record's required fields and the Subject: issue-<n> trailer."
     },
     {
       "name": "timeline-order-gate",
       "source": "./timeline-order-gate",
-      "description": "PreToolUse gate for reflect's issue-retrospective record: the Timeline section must be present and no causal-claim language may precede it (issue #12 record norm; issue #18 plugin-set design)."
+      "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: the Timeline section must be present and no causal-claim language may precede it (issue #12 record norm; issue #18 plugin-set design)."
     },
     {
       "name": "contributing-factors-gate",
       "source": "./contributing-factors-gate",
-      "description": "PreToolUse gate for reflect's issue-retrospective record: causation must be plural and structural ('contributing factor(s)'/'factors'); 'root cause' without co-occurring 'factors' language is refused (issue #12 record norm; issue #18 plugin-set design)."
+      "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: causation must be plural and structural ('contributing factor(s)'/'factors'); 'root cause' without co-occurring 'factors' language is refused (issue #12 record norm; issue #18 plugin-set design)."
     },
     {
       "name": "recurred-prediction-gate",
       "source": "./recurred-prediction-gate",
-      "description": "PreToolUse gate for reflect's issue-retrospective record: 'What we learned' must explicitly answer whether an earlier reflect record predicted a failure mode that recurred here, even when the answer is 'no earlier record existed' (issue #12 record norm; issue #18 plugin-set design)."
+      "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: 'What we learned' must explicitly answer whether an earlier issue-retrospective record predicted a failure mode that recurred here, even when the answer is 'no earlier record existed' (issue #12 record norm; issue #18 plugin-set design)."
     },
     {
       "name": "action-item-shape-gate",
       "source": "./action-item-shape-gate",
-      "description": "PreToolUse gate for reflect's issue-retrospective record: when a non-'none' Action items section is claimed, each item must name an owner and be phrased as a concrete, checkable change (issue #12 record norm; issue #18 plugin-set design)."
+      "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: when a non-'none' Action items section is claimed, each item must name an owner and be phrased as a concrete, checkable change (issue #12 record norm; issue #18 plugin-set design)."
     },
     {
       "name": "freelunch-completeness-gate",
       "source": "./freelunch-completeness-gate",
-      "description": "PreToolUse gate wired into both reflect's 기획서 (proposal) and 산출물 (record) write surfaces: inputs-read paths named, a synthesis section distinct from raw paste, and adopted norms with sourced rationale (issue #18 plugin-set design)."
+      "description": "PreToolUse gate wired into both issue-retrospective's 기획서 (proposal) and 산출물 (record) write surfaces: inputs-read paths named, a synthesis section distinct from raw paste, and adopted norms with sourced rationale (issue #18 plugin-set design)."
     },
     {
       "name": "proposal-order-gate",
       "source": "./proposal-order-gate",
-      "description": "PreToolUse gate for reflect's issue-retrospective record write: refuses it unless the subject's own phase-1 proposal already exists on disk and names a survey path plus a scout-brief path or an explicit scout-skip (contract v3 s19; issue #18 plugin-set design)."
+      "description": "PreToolUse gate for issue-retrospective's issue-retrospective record write: refuses it unless the subject's own phase-1 proposal already exists on disk and names a survey path plus a scout-brief path or an explicit scout-skip (contract v3 s19; issue #18 plugin-set design)."
     }
   ]
 }

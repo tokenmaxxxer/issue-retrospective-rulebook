@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# One-shot installer for the tokenmaxxxer reflect-role stack.
-# Registers the tokenmaxxxer-reflect marketplace and installs the
-# reflect plugin,
+# One-shot installer for the tokenmaxxxer issue-retrospective-role stack.
+# Registers the tokenmaxxxer-issue-retrospective marketplace and installs the
+# issue-retrospective plugin,
 # then refreshes the marketplace once.
 #
 # Installs for your account only (user scope). Uses a real `claude` CLI
@@ -14,16 +14,16 @@
 # repository or marketplace.
 set -euo pipefail
 
-MARKET="tokenmaxxxer-reflect"
-BUNDLE="reflect"
-ALL_PLUGINS=(reflect timeline-order-gate contributing-factors-gate recurred-prediction-gate action-item-shape-gate freelunch-completeness-gate proposal-order-gate)
-GITHUB_REPO="tokenmaxxxer/reflect-agent-rulebook"
+MARKET="tokenmaxxxer-issue-retrospective"
+BUNDLE="issue-retrospective"
+ALL_PLUGINS=(issue-retrospective timeline-order-gate contributing-factors-gate recurred-prediction-gate action-item-shape-gate freelunch-completeness-gate proposal-order-gate)
+GITHUB_REPO="tokenmaxxxer/issue-retrospective-agent-rulebook"
 
 usage() {
   cat <<'USAGE'
 Usage: install.sh
 
-  Installs the tokenmaxxxer reflect-role stack for your account only.
+  Installs the tokenmaxxxer issue-retrospective-role stack for your account only.
   Applies to every machine-local session but does not travel with any
   repo, and does not reach Claude Code on the web / Slack cloud sessions.
   -h, --help  Show this help.
@@ -166,9 +166,9 @@ fi
 cat <<'MSG'
 ==> done (user scope). Start (or reload) a Claude Code session, then:
     - verify with /plugins
-    - RECOMMENDED: open /plugin -> marketplaces -> tokenmaxxxer-reflect and enable
+    - RECOMMENDED: open /plugin -> marketplaces -> tokenmaxxxer-issue-retrospective and enable
       auto-update, so future stack additions arrive automatically. There is
       no CLI/config switch for this toggle; it is a one-time interactive step.
     - without auto-update, refresh manually anytime:
-      claude plugin update reflect@tokenmaxxxer-reflect
+      claude plugin update issue-retrospective@tokenmaxxxer-issue-retrospective
 MSG

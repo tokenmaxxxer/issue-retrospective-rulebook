@@ -5,7 +5,7 @@ gate_trap_fail_closed
 # (issue #18 plugin-set design; adapted from
 # pricing-rulebook/pricing/hooks/methodology-gate.sh's technique).
 #
-# Owns: plural structural causation, no singular attribution. A reflect
+# Owns: plural structural causation, no singular attribution. A issue-retrospective
 # record must name "contributing factor(s)"/"factors" inside its
 # "Contributing factors" section; the phrase "root cause" (singular
 # attribution) anywhere in the document without co-occurring in-section
@@ -20,7 +20,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_CONTRIBUTING_FACTORS_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_CONTRIBUTING_FACTORS_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -77,7 +77,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -128,7 +128,7 @@ try:
     m = re.search(r'(?im)^\s*#{1,6}\s*contributing factors?\b', new_text)
     if not m:
         deny(
-            "reflect record at %s has no 'Contributing factors' section. Per "
+            "issue-retrospective record at %s has no 'Contributing factors' section. Per "
             "issue #12's record norm, the record body must contain a plural, "
             "structural Contributing factors section." % rel
         )
@@ -140,7 +140,7 @@ try:
 
     if not has_factors:
         deny(
-            "reflect record at %s has a 'Contributing factors' section that names no "
+            "issue-retrospective record at %s has a 'Contributing factors' section that names no "
             "'contributing factor(s)'/'factors' language in its own body. Per issue "
             "#12's record norm, the section itself must carry plural, structural "
             "causation language, not just its heading." % rel
@@ -153,7 +153,7 @@ try:
     has_root_cause = "root cause" in new_text.lower()
     if has_root_cause and not has_factors:
         deny(
-            "reflect record at %s uses 'root cause' (singular attribution) without "
+            "issue-retrospective record at %s uses 'root cause' (singular attribution) without "
             "'contributing factor(s)'/'factors' language in its Contributing factors "
             "section. Per issue #12's record norm, causation must be plural and "
             "structural, never a single root cause." % rel

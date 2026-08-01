@@ -1,6 +1,6 @@
 {
   "name": "action-item-shape-gate",
-  "description": "PreToolUse gate for reflect's issue-retrospective record: when a non-'none' Action items section is claimed, each item must name an owner and be phrased as a concrete, checkable change (issue #12 record norm; issue #18 plugin-set design).",
+  "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: when a non-'none' Action items section is claimed, each item must name an owner and be phrased as a concrete, checkable change (issue #12 record norm; issue #18 plugin-set design).",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
   }

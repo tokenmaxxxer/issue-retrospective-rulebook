@@ -17,7 +17,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_ACTION_ITEM_SHAPE_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_ACTION_ITEM_SHAPE_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -74,7 +74,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -140,7 +140,7 @@ try:
 
     if "owner" not in low:
         deny(
-            "reflect record at %s has a non-empty 'Action items' section with no "
+            "issue-retrospective record at %s has a non-empty 'Action items' section with no "
             "'owner' naming a person/role. Per issue #12's record norm, when action "
             "items are present each must name an owner (not \"the team\") and be a "
             "concrete, checkable change." % rel

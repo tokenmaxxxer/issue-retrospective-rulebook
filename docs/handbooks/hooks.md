@@ -5,19 +5,19 @@
 The three role-agnostic gates (`trailer-gate.sh`, `record-fields-gate.sh`,
 `handbook-trigger-gate.sh`) are core canon (core issue #66): core's own
 `hooks.json` fires them for every plugin install. This repo no longer
-vendors copies or registers them in `reflect/hooks/hooks.json`.
+vendors copies or registers them in `issue-retrospective/hooks/hooks.json`.
 
-`reflect`'s non-default terminal `loop_state` (`round-done`, vs core's
+`issue-retrospective`'s non-default terminal `loop_state` (`round-done`, vs core's
 default `landed`) is set via `RECORD_FIELDS_TERMINAL_STATES=round-done` in
-`reflect/hooks/directive.sh` — see `docs/issue-13/reports/implementation.md`
+`issue-retrospective/hooks/directive.sh` — see `docs/issue-13/reports/implementation.md`
 for the open question on whether that channel actually reaches core's
 separately-invoked gate process.
 
 ## `directive.sh`
 
-`reflect/hooks/directive.sh` is a stub: it sources
+`issue-retrospective/hooks/directive.sh` is a stub: it sources
 `core/hooks/lib/role-directive.sh` and calls `core_role_directive` with
-reflect's four role-unique values (YOU DECIDE / USE WHEN / PRODUCES /
+issue-retrospective's four role-unique values (YOU DECIDE / USE WHEN / PRODUCES /
 HAND-OFF). No local trap/kill-switch/`CLAUDE_ROLE`-guard boilerplate — that
 lives once in the shared lib.
 
@@ -26,8 +26,8 @@ lives once in the shared lib.
 Per approver FEEDBACK on PR #20, each adopted methodology check is its own
 independently installable plugin — its own `plugin.json`, its own
 `hooks/hooks.json` `PreToolUse` entry, its own kill switch, its own test
-file — registered in `.claude-plugin/marketplace.json` alongside `reflect`,
-not folded into `reflect/hooks/plugins/`:
+file — registered in `.claude-plugin/marketplace.json` alongside `issue-retrospective`,
+not folded into `issue-retrospective/hooks/plugins/`:
 
 | Plugin dir | Methodology owned | Write surface(s) |
 |---|---|---|
@@ -41,19 +41,19 @@ not folded into `reflect/hooks/plugins/`:
 Each plugin's `hooks/<name>.sh` is independently deploy/disable-able
 (`ISSUE_RETROSPECTIVE_<PLUGIN>_GATE_OFF=1`) — removing one plugin's
 `hooks.json` entry never affects another plugin's checks. `install.sh`
-installs all seven plugins (`reflect` + the six gates) from
-`tokenmaxxxer-reflect` in one pass.
+installs all seven plugins (`issue-retrospective` + the six gates) from
+`tokenmaxxxer-issue-retrospective` in one pass.
 
 ## Run the checks
 
-    /bin/bash tests/parse-check.sh reflect/hooks
+    /bin/bash tests/parse-check.sh issue-retrospective/hooks
     /bin/bash tests/parse-check.sh timeline-order-gate/hooks
     /bin/bash tests/parse-check.sh contributing-factors-gate/hooks
     /bin/bash tests/parse-check.sh recurred-prediction-gate/hooks
     /bin/bash tests/parse-check.sh action-item-shape-gate/hooks
     /bin/bash tests/parse-check.sh freelunch-completeness-gate/hooks
     /bin/bash tests/parse-check.sh proposal-order-gate/hooks
-    /bin/bash tests/stub-check.sh reflect
+    /bin/bash tests/stub-check.sh issue-retrospective
     /bin/bash tests/deny-only-check.sh .
     for d in timeline-order-gate contributing-factors-gate recurred-prediction-gate \
              action-item-shape-gate freelunch-completeness-gate proposal-order-gate; do
