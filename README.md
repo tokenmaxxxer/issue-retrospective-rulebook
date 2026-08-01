@@ -1,4 +1,4 @@
-# tokenmaxxxer / reflect-agent-rulebook
+# tokenmaxxxer / issue-retrospective-agent-rulebook
 
 The `issue-retrospective` role on contract v3. A session is spawned with
 two plugin sets installed: this marketplace's six `issue-retrospective`
@@ -64,7 +64,7 @@ proposal surface).
 
 Additionally:
 
-    reflect/hooks/directive.sh          SessionStart -- a core-canon stub
+    issue-retrospective/hooks/directive.sh          SessionStart -- a core-canon stub
                                         (sources core/hooks/lib/role-directive.sh)
                                         carrying the role's four facets:
                                         research (exemplar retros; recurred
@@ -95,21 +95,21 @@ installed by `core`.
 
 ## Record vocabulary
 
-`loop_state`: `idle, reflecting, candidate-round-done, round-done`
+`loop_state`: `idle, retrospecting, candidate-round-done, round-done`
 (terminal: `round-done`, set only after the round-end value gates run —
 contract s18). The record must always carry a non-empty pointer to the
 role records it read.
 
 ## Install
 
-    claude plugin marketplace add tokenmaxxxer/reflect-agent-rulebook
-    claude plugin install timeline-order-gate@tokenmaxxxer-reflect
-    claude plugin install contributing-factors-gate@tokenmaxxxer-reflect
-    claude plugin install recurred-prediction-gate@tokenmaxxxer-reflect
-    claude plugin install action-item-shape-gate@tokenmaxxxer-reflect
-    claude plugin install freelunch-completeness-gate@tokenmaxxxer-reflect
-    claude plugin install proposal-order-gate@tokenmaxxxer-reflect
-    claude plugin install reflect@tokenmaxxxer-reflect
+    claude plugin marketplace add tokenmaxxxer/issue-retrospective-agent-rulebook
+    claude plugin install timeline-order-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install contributing-factors-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install recurred-prediction-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install action-item-shape-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install freelunch-completeness-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install proposal-order-gate@tokenmaxxxer-issue-retrospective
+    claude plugin install issue-retrospective@tokenmaxxxer-issue-retrospective
 
 ## Run the checks
 

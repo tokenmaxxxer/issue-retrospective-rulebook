@@ -20,7 +20,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_PROPOSAL_ORDER_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_PROPOSAL_ORDER_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -77,7 +77,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -116,7 +116,7 @@ try:
 
     if prop_path is None or not os.path.isfile(prop_path):
         deny(
-            "reflect record write for subject issue-%s targets %s but no phase-1 "
+            "issue-retrospective record write for subject issue-%s targets %s but no phase-1 "
             "proposal (docs/issue-%s/proposals/*issue-retrospective*.md) exists on "
             "disk. Per contract v3 s19, phase 1 (proposal) must precede phase 2 "
             "(record)." % (subject_n, rel, subject_n)
@@ -127,7 +127,7 @@ try:
             prop_text = fh.read(1 << 20)
     except OSError:
         deny(
-            "reflect record write for subject issue-%s targets %s but its phase-1 "
+            "issue-retrospective record write for subject issue-%s targets %s but its phase-1 "
             "proposal at %s exists and cannot be read; failing closed on phase "
             "ordering." % (subject_n, rel, prop_path[len(root):].lstrip("/"))
         )

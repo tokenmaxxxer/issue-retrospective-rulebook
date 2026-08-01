@@ -1,6 +1,6 @@
 {
   "name": "contributing-factors-gate",
-  "description": "PreToolUse gate for reflect's issue-retrospective record: causation must be plural and structural ('contributing factor(s)'/'factors'); 'root cause' without co-occurring 'factors' language is refused (issue #12 record norm; issue #18 plugin-set design).",
+  "description": "PreToolUse gate for issue-retrospective's issue-retrospective record: causation must be plural and structural ('contributing factor(s)'/'factors'); 'root cause' without co-occurring 'factors' language is refused (issue #12 record norm; issue #18 plugin-set design).",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
   }

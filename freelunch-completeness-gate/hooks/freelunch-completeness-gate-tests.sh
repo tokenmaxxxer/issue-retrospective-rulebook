@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reflect's freelunch-completeness-gate.sh, exercised as a real subprocess.
+# issue-retrospective's freelunch-completeness-gate.sh, exercised as a real subprocess.
 # Runs against BOTH write surfaces it guards (기획서 proposal + 산출물
 # record), per issue #18 proposal (b)/(c) item 5.
 set -uo pipefail

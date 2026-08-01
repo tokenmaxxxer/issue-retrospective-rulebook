@@ -5,8 +5,8 @@ gate_trap_fail_closed
 # (issue #18 plugin-set design; adapted from
 # pricing-rulebook/pricing/hooks/methodology-gate.sh's technique).
 #
-# Owns: the recurred-prediction question must be answered. A reflect
-# record's "What we learned" section must say whether an earlier reflect
+# Owns: the recurred-prediction question must be answered. A issue-retrospective
+# record's "What we learned" section must say whether an earlier issue-retrospective
 # record predicted a failure mode that recurred in THIS issue -- including
 # the explicit case where no earlier record existed. Section-scoped (issue
 # #21): the "recurred"/"predicted" trigger words must appear inside the
@@ -20,7 +20,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_RECURRED_PREDICTION_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_RECURRED_PREDICTION_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -77,7 +77,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -131,7 +131,7 @@ try:
     m = re.search(r'(?im)^\s*#{1,6}\s*what we learned\b', new_text)
     if not m:
         deny(
-            "reflect record at %s has no 'What we learned' section. Per issue #12's "
+            "issue-retrospective record at %s has no 'What we learned' section. Per issue #12's "
             "record norm, the record body must contain a 'What we learned' section "
             "answering the recurred-prediction question." % rel
         )
@@ -142,14 +142,14 @@ try:
     low_doc = new_text.lower()
 
     in_section = bool(re.search(r'\brecurred\b|\bpredicted\b', low_section))
-    no_earlier_anywhere = bool(re.search(r'no earlier (reflect )?record (existed|exists)', low_doc))
+    no_earlier_anywhere = bool(re.search(r'no earlier (issue-retrospective )?record (existed|exists)', low_doc))
     answered = in_section or no_earlier_anywhere
 
     if not answered:
         deny(
-            "reflect record at %s does not answer the recurred-prediction question. Per "
+            "issue-retrospective record at %s does not answer the recurred-prediction question. Per "
             "issue #12's record norm, 'What we learned' must explicitly say whether an "
-            "earlier reflect record predicted a failure mode that recurred in THIS issue "
+            "earlier issue-retrospective record predicted a failure mode that recurred in THIS issue "
             "-- even when the answer is 'no earlier record existed'." % rel
         )
 

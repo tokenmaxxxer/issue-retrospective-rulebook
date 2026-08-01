@@ -1,6 +1,6 @@
 {
   "name": "freelunch-completeness-gate",
-  "description": "PreToolUse gate wired into both reflect's 기획서 (proposal) and 산출물 (record) write surfaces: inputs-read paths named, a synthesis section distinct from raw paste, and adopted norms with sourced rationale (issue #18 plugin-set design).",
+  "description": "PreToolUse gate wired into both issue-retrospective's 기획서 (proposal) and 산출물 (record) write surfaces: inputs-read paths named, a synthesis section distinct from raw paste, and adopted norms with sourced rationale (issue #18 plugin-set design).",
   "author": {
     "name": "Jung Jiwon & Lee Jongkwan"
   }

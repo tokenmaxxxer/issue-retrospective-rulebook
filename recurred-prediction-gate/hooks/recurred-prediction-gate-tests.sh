@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reflect's recurred-prediction-gate.sh, exercised as a real subprocess.
+# issue-retrospective's recurred-prediction-gate.sh, exercised as a real subprocess.
 # Scaffold adapted from implementation-rulebook/tests/run-gate-tests.sh.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"

@@ -42,10 +42,10 @@ fi
 
 # --- substance probe: an empty record must be refused ---------------------
 # In v3 the forged-approval and foreign-record probes belong to core's
-# board-gate; what THIS rulebook owes is contract s20 substance — a reflect
+# board-gate; what THIS rulebook owes is contract s20 substance — a issue-retrospective
 # record with none of the required sections must not be writable.
-probe_dir="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../reflect/hooks" && pwd -P)}"
-rec_rel="docs/issue-999/reports/reflect.md"
+probe_dir="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../issue-retrospective/hooks" && pwd -P)}"
+rec_rel="docs/issue-999/reports/issue-retrospective.md"
 
 substance_probe() {
   gates="$(find "$probe_dir" -name '*-gate.sh' -type f 2>/dev/null | grep -vE '/(tests?)/' || true)"
@@ -61,7 +61,7 @@ substance_probe() {
   done
   rm -rf "$td"
   if [ "$refused" = 0 ]; then
-    echo "deny-only-check: FAIL — no gate under $probe_dir refuses writing an empty reflect record to" >&2
+    echo "deny-only-check: FAIL — no gate under $probe_dir refuses writing an empty issue-retrospective record to" >&2
     echo "  $rec_rel  (contract s20 minimum content)" >&2
     return 1
   fi

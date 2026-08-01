@@ -5,7 +5,7 @@ non-blocking prompt, the same role `state.sh` plays in
 implementation-rulebook). Walk both questions explicitly at record-writing
 time, when a round is concluding (`loop_state: round-done`). Neither
 question is keyword-checkable, which is why this lives as a checklist
-instead of a `reflect/hooks/plugins/*-gate.sh` file (issue #18 proposal
+instead of a `issue-retrospective/hooks/plugins/*-gate.sh` file (issue #18 proposal
 (d)).
 
 ## A. Procedure-value

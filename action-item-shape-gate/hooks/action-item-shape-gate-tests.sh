@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reflect's action-item-shape-gate.sh, exercised as a real subprocess.
+# issue-retrospective's action-item-shape-gate.sh, exercised as a real subprocess.
 # Scaffold adapted from implementation-rulebook/tests/run-gate-tests.sh.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -96,10 +96,10 @@ import json, sys
 fp = sys.argv[1]
 print(json.dumps({"tool_name": "MultiEdit", "tool_input": {"file_path": fp, "edits": [
   {"old_string": "x", "new_string": "fix", "replace_all": True},
-  {"old_string": "claim", "new_string": "owner: reflect role", "replace_all": False}]}}))
+  {"old_string": "claim", "new_string": "owner: issue-retrospective role", "replace_all": False}]}}))
 '
-# every "x" -> "fix" (replace_all:true); "claim" -> "owner: reflect role" once
-# (replace_all:false) -> body "fix fix fix owner: reflect role" -> owner
+# every "x" -> "fix" (replace_all:true); "claim" -> "owner: issue-retrospective role" once
+# (replace_all:false) -> body "fix fix fix owner: issue-retrospective role" -> owner
 # present -> allow
 
 # --- mandatory case: malformed JSON denies, fail-closed --------------------

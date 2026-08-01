@@ -18,7 +18,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_FREELUNCH_COMPLETENESS_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_FREELUNCH_COMPLETENESS_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -75,7 +75,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -168,7 +168,7 @@ try:
     if missing:
         surface = "phase-1 proposal" if is_proposal else "phase-2 record"
         deny(
-            "this reflect %s at %s is missing required freelunch-completeness "
+            "this issue-retrospective %s at %s is missing required freelunch-completeness "
             "element(s): %s. Per issue #18's plugin-set design, every 기획서/산출물 "
             "must name its input record paths, carry a synthesis section distinct "
             "from raw paste, and state adopted norms with sourced rationale." %

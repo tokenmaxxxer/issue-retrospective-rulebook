@@ -5,7 +5,7 @@ gate_trap_fail_closed
 # (issue #18 plugin-set design; adapted from
 # pricing-rulebook/pricing/hooks/methodology-gate.sh's technique).
 #
-# Owns: Timeline-first ordering (issue #12 record norm). A reflect record's
+# Owns: Timeline-first ordering (issue #12 record norm). A issue-retrospective record's
 # Timeline section must be present, and no causal-claim language
 # ("contributing factor(s)"/"root cause") may appear before it.
 #
@@ -16,7 +16,7 @@ gate_trap_fail_closed
 # Kill switch: export ISSUE_RETROSPECTIVE_TIMELINE_ORDER_GATE_OFF=1
 set -uo pipefail
 
-role="${CLAUDE_ROLE:-reflect}"
+role="${CLAUDE_ROLE:-issue-retrospective}"
 deny() { gate_deny "$role" "$1"; }
 
 gate_kill_switch_active "${ISSUE_RETROSPECTIVE_TIMELINE_ORDER_GATE_OFF:-}" || { trap - EXIT; exit 0; }
@@ -73,7 +73,7 @@ try:
     _spec.loader.exec_module(gate_lib)
 
     def deny(m):
-        sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
+        sys.stderr.write("issue-retrospective: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
     ev = gate_lib.gate_parse_json_or_deny(raw, deny)
@@ -121,7 +121,7 @@ try:
     m = re.search(r'(?im)^\s*#{1,6}\s*timeline\b', new_text)
     if not m:
         deny(
-            "reflect record at %s has no 'Timeline' section. Per issue #12's record "
+            "issue-retrospective record at %s has no 'Timeline' section. Per issue #12's record "
             "norm, the record body must contain a chronological Timeline section, "
             "built only from other roles' records/PR history, preceding any causal "
             "claim." % rel
@@ -131,7 +131,7 @@ try:
     causal = re.search(r'(?i)\bcontributing factor|\broot cause\b', before_timeline)
     if causal:
         deny(
-            "reflect record at %s states a causal claim (%r) before its Timeline "
+            "issue-retrospective record at %s states a causal claim (%r) before its Timeline "
             "section. Per issue #12's record norm, Timeline must precede any causal "
             "claim, even when both sections are present." % (rel, causal.group(0))
         )

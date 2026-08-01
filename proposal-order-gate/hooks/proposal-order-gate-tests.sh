@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reflect's proposal-order-gate.sh, exercised as a real subprocess. Unlike
+# issue-retrospective's proposal-order-gate.sh, exercised as a real subprocess. Unlike
 # the other plugins, this gate reads the subject's own phase-1 proposal
 # directly off disk (state via file-read, no persistent state file), so the
 # fixture proposal must be written into the scratch repo before the record
