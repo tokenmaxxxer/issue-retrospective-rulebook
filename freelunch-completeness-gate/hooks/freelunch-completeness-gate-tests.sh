@@ -177,5 +177,8 @@ print(json.dumps({"tool_name": "Write", "tool_input": {
   "file_path": fp, "content": "## What the survey found\nSynthesis text.\n## Adopted norms\nAdopted per issue-12 rationale."}}))
 '
 
+# --- mandatory case: missing core (core #75 source guard) fails closed ----
+runcase deny missing-core-source-guard "$REC" "$COMPLETE" CLAUDE_PLUGIN_ROOT_CORE=/nonexistent/core
+
 printf '\n== %d passed, %d failed ==\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

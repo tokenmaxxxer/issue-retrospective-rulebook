@@ -136,5 +136,8 @@ print(json.dumps({"tool_name": "Write", "tool_input": {
   "file_path": fp, "content": "## Contributing factors\nRoot cause was X.\n## Timeline\n1. Issue filed."}}))
 '
 
+# --- mandatory case: missing core (core #75 source guard) fails closed ----
+runcase deny missing-core-source-guard "$REC" "$GOOD" CLAUDE_PLUGIN_ROOT_CORE=/nonexistent/core
+
 printf '\n== %d passed, %d failed ==\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

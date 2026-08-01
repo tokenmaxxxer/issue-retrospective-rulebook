@@ -106,5 +106,8 @@ print(json.dumps({"tool_name": "Write", "tool_input": {
   "file_path": fp, "content": "content"}}))
 '
 
+# --- mandatory case: missing core (core #75 source guard) fails closed ----
+runcase deny missing-core-source-guard "$REC" "content" "$SURVEY_AND_SCOUT" CLAUDE_PLUGIN_ROOT_CORE=/nonexistent/core
+
 printf '\n== %d passed, %d failed ==\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
