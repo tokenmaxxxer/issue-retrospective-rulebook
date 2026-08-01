@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-__fc(){ rc=$?; if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then echo "fail-closed: gate aborted (rc=$rc)" >&2; exit 2; fi; }
-trap __fc EXIT
+. "${CLAUDE_PLUGIN_ROOT_CORE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../core" && pwd -P)}/hooks/lib/gate-lib.sh"
+gate_trap_fail_closed
 # PreToolUse gate (Write|Edit|MultiEdit) -- one plugin, one methodology
 # (issue #18 plugin-set design; adapted from
 # pricing-rulebook/pricing/hooks/methodology-gate.sh's technique).
@@ -17,12 +17,9 @@ trap __fc EXIT
 set -uo pipefail
 
 role="${CLAUDE_ROLE:-reflect}"
-deny() { echo "${role}: refused — $1" >&2; exit 2; }
+deny() { gate_deny "$role" "$1"; }
 
-case "${ISSUE_RETROSPECTIVE_TIMELINE_ORDER_GATE_OFF:-}" in
-  ""|0|false|no|off) ;;
-  *) exit 0 ;;
-esac
+gate_kill_switch_active "${ISSUE_RETROSPECTIVE_TIMELINE_ORDER_GATE_OFF:-}" || { trap - EXIT; exit 0; }
 
 command -v python3 >/dev/null 2>&1 || deny "timeline-order-gate.sh requires python3, which is not on PATH; denying rather than guessing."
 
@@ -69,35 +66,25 @@ PG_PAYLOAD="$payload" PG_ROOT="$root" \
 python3 <<'PY'
 import sys as _fc_sys  # fail-closed-on-internal-error
 try:
-    import json, os, posixpath, re, sys
+    import json, os, re, sys, importlib.util
+
+    _spec = importlib.util.spec_from_file_location("gate_lib", os.environ["GATE_LIB_PY"])
+    gate_lib = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(gate_lib)
 
     def deny(m):
         sys.stderr.write("reflect: refused — %s\n" % m); sys.exit(2)
 
     raw = os.environ.get("PG_PAYLOAD", "")
-    try:
-        ev = json.loads(raw) if raw else {}
-    except ValueError:
-        deny("the tool-call payload is not valid JSON; the gate cannot judge timeline ordering on an unparseable write.")
-    if not isinstance(ev, dict):
-        deny("the tool-call payload is not a JSON object; failing closed on timeline ordering.")
+    ev = gate_lib.gate_parse_json_or_deny(raw, deny)
 
     tool = ev.get("tool_name")
     ti = ev.get("tool_input")
     if not isinstance(ti, dict):
         deny("tool_input is missing or not a JSON object; the gate cannot judge a write it cannot parse (timeline ordering).")
 
-    root = posixpath.normpath(os.environ["PG_ROOT"].replace("\\", "/"))
+    root = os.environ["PG_ROOT"]
     RECORD_RE = re.compile(r'^docs/issue-[0-9]+/reports/issue-retrospective\.md$')
-
-    def resolve(p):
-        n = p.replace("\\", "/")
-        a = n if posixpath.isabs(n) else posixpath.join(root, n)
-        a = posixpath.normpath(a)
-        try:
-            return posixpath.normpath(os.path.realpath(a).replace("\\", "/"))
-        except OSError:
-            return a
 
     path = None
     if tool in ("Write", "Edit", "MultiEdit"):
@@ -107,13 +94,13 @@ try:
     if path is None:
         sys.exit(0)
 
-    r = resolve(path)
-    if not r.startswith(root + "/"):
+    rel = gate_lib.gate_normalize_path(root, path)
+    if rel is None:
         sys.exit(0)
-    rel = r[len(root):].lstrip("/")
     if not RECORD_RE.match(rel):
         sys.exit(0)  # not the record write surface — not this plugin's business
 
+    r = os.path.join(root, rel)
     current = None
     if os.path.isfile(r):
         try:
@@ -122,31 +109,8 @@ try:
         except OSError:
             deny("%s exists but cannot be read; failing closed on timeline ordering." % rel)
 
-    new_text = None
-    if tool == "Write":
-        c = ti.get("content")
-        if isinstance(c, str):
-            new_text = c
-    elif tool == "Edit":
-        o, n = ti.get("old_string"), ti.get("new_string")
-        if isinstance(o, str) and isinstance(n, str) and current is not None and o in current:
-            new_text = current.replace(o, n, 1)
-    elif tool == "MultiEdit":
-        edits = ti.get("edits")
-        text = current
-        if isinstance(edits, list) and text is not None:
-            ok = True
-            for e in edits:
-                if not isinstance(e, dict):
-                    ok = False; break
-                o, n = e.get("old_string"), e.get("new_string")
-                if not isinstance(o, str) or not isinstance(n, str) or o not in text:
-                    ok = False; break
-                text = text.replace(o, n, 1)
-            if ok:
-                new_text = text
-
-    if new_text is None:
+    new_text, ok = gate_lib.gate_reconstruct_write(tool, ti, current)
+    if not ok:
         deny(
             "this write targets %s but the gate cannot determine the resulting content "
             "from the tool input (tool=%r). Write the full document with Write, or use an "
