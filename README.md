@@ -46,9 +46,11 @@ guards a specific methodology requirement on the record body:
   answer whether an earlier `issue-retrospective` record predicted a
   failure mode that recurred in this issue, including the explicit "no
   earlier record existed" case.
-- **action-item-shape-gate** — action items are optional, but when
-  present each must name an owner (a person/role, not "the team") and be
-  a concrete, checkable change.
+- **action-item-shape-gate** — the "Action items" section itself is
+  structurally required (spec: `action_items` `required: true`) but its
+  content stays advisory-only; when content is present each item must
+  name an owner (a person/role, not "the team") and be a concrete,
+  checkable change.
 - **freelunch-completeness-gate** — inputs-read paths named, a synthesis
   section distinct from raw paste, and an adopted-norms-with-rationale
   section; wired into both the proposal and the record write surfaces.
@@ -70,7 +72,10 @@ Additionally:
                                         research (exemplar retros; recurred
                                         predictions), survey (records-only),
                                         proposal (named inputs), judgment
-                                        (round-end value gates, advisory-only)
+                                        (round-end value gates, advisory-only);
+                                        record body order: retro_id, Timeline,
+                                        Impact summary, Contributing factors,
+                                        What we learned, Action items
 
 ## Kill switches
 
@@ -95,10 +100,16 @@ installed by `core`.
 
 ## Record vocabulary
 
-`loop_state`: `idle, retrospecting, candidate-round-done, round-done`
-(terminal: `round-done`, set only after the round-end value gates run —
-contract s18). The record must always carry a non-empty pointer to the
-role records it read.
+`loop_state`: `idle, gathering, writing, landed,
+blame-language-detected, timeline-unreachable` (terminal: `landed`, set
+only after the round-end value gates run — contract s18;
+`blame-language-detected` and `timeline-unreachable` are non-progress
+refusal/error states, not part of the idle→landed progress line). The
+record must always carry a non-empty pointer to the role records it
+read, name its `retro_id` (satisfied by `issue-<n>`), and include an
+`Impact summary` section between Timeline and Contributing factors.
+Action items are a structurally required section (spec:
+`action_items` `required: true`) whose content stays advisory-only.
 
 ## Install
 
