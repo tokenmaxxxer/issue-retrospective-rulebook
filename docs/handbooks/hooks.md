@@ -7,11 +7,12 @@ The three role-agnostic gates (`trailer-gate.sh`, `record-fields-gate.sh`,
 `hooks.json` fires them for every plugin install. This repo no longer
 vendors copies or registers them in `issue-retrospective/hooks/hooks.json`.
 
-`issue-retrospective`'s non-default terminal `loop_state` (`round-done`, vs core's
-default `landed`) is set via `RECORD_FIELDS_TERMINAL_STATES=round-done` in
+`issue-retrospective`'s terminal `loop_state` is `landed`, matching core's own
+default; set explicitly via `RECORD_FIELDS_TERMINAL_STATES=landed` in
 `issue-retrospective/hooks/directive.sh` — see `docs/issue-13/reports/implementation.md`
 for the open question on whether that channel actually reaches core's
-separately-invoked gate process.
+separately-invoked gate process. (Renamed from `round-done` per issue #31
+to match the marketplace spec's loop_state vocabulary exactly.)
 
 ## `directive.sh`
 

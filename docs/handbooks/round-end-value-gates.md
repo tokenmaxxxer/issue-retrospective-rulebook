@@ -8,6 +8,11 @@ question is keyword-checkable, which is why this lives as a checklist
 instead of a `issue-retrospective/hooks/plugins/*-gate.sh` file (issue #18 proposal
 (d)).
 
+`impact_summary` and `retro_id` (issue #31) are directive-level record
+fields (`issue-retrospective/hooks/directive.sh`'s `produces`), not new
+round-end value-gate questions — this file's two questions (A, B) are
+unchanged by that mapping.
+
 ## A. Procedure-value
 
 Question: can this role or mechanism cite evidence it changed this issue's
