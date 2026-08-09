@@ -73,8 +73,41 @@ approver `JiwonJung94`, listed in `docs/specs/approvers.md`).
 ## What did not work
 None.
 
+## Phase-2 continuation — live re-check (2026-08-09)
+Re-ran every script under `tests/`, `*/tests/`, `*/hooks/tests/` with
+`CLAUDE_PLUGIN_ROOT_CORE` unset, per the follow-up request to confirm no
+non-SKIP failures remain. `find` for directories named `tests` or
+matching `*/hooks/tests` found only `./tests/` — the six gate scripts
+live directly under `*/hooks/`, already covered above.
+
+Results: all six `*-tests.sh` scripts exit `75` with the exact SKIP
+message (unchanged, confirming the prior landing). Of the three scripts
+under `tests/` (`deny-only-check.sh`, `parse-check.sh`,
+`stub-check.sh`) — none of which reference `CLAUDE_PLUGIN_ROOT_CORE` or
+depend on core reachability, so the convention does not apply to
+them — `deny-only-check.sh` and `parse-check.sh` exit `0`;
+`stub-check.sh` exits `1`.
+
+`stub-check.sh`'s failure is a real, pre-existing defect, not an
+env-resolution issue: it is issue-66's drift-recurrence detector, and it
+correctly flags that `tests/parse-check.sh` in this repo is a vendored
+copy of a file now distributed as a core canon hook
+(`core/hooks/hooks.json`), which is drift per issue-66's own decision.
+This is unrelated to #34's SKIP contract (the script runs
+deterministically regardless of `CLAUDE_PLUGIN_ROOT_CORE`) and out of
+this issue's frozen write set — recorded below as an open finding
+rather than masked or silently fixed.
+
 ## Open findings
-None.
+- finding: `tests/stub-check.sh` exits 1 (real failure, not
+  environment-shaped) because `tests/parse-check.sh` in this repo is a
+  vendored copy of a file core now distributes as a canon hook
+  (`core/hooks/hooks.json`) — flagged as drift per issue-66's decision
+  (see `tests/stub-check.sh` header comment). Out of #34's frozen write
+  set (six `*-tests.sh` gate scripts); the fix is deleting the vendored
+  `tests/parse-check.sh` copy and its `hooks.json` entry, which issue-66
+  tracks but does not execute. code_sha=60cee09 (HEAD at time of this
+  continuation check).
 
 ## resolved_findings
 - finding: docs/reports/2026-08-09-hunt-adopt-test-env-resolution.md,
@@ -107,7 +140,12 @@ None.
 - closed_checks: convention-doc-referenced-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
 
 ## Next steps
-None — commit and open PR closing #34.
+None for #34 — commit and keep the PR closing #34. The one open
+finding above belongs to issue-66's tracked follow-up (deleting the
+vendored `tests/parse-check.sh` copy), not to this issue's frozen write
+set.
 
 ## Resolution path
-N/A — no open findings.
+The open finding's resolution path is issue-66 (deletion of the
+vendored `tests/parse-check.sh` copy and its `hooks.json` entry) — out
+of #34's scope, so it does not block this record's `landed` state.
