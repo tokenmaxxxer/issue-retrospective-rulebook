@@ -76,6 +76,31 @@ None.
 ## Open findings
 None.
 
+## resolved_findings
+- finding: docs/reports/2026-08-09-hunt-adopt-test-env-resolution.md,
+  before-landing stance 3 — "sibling-candidate resolution omits the
+  path that happens to exist on this dev machine
+  (`/home/jwjung/tokenmaxxxer/tokenmaxxxer-core/core`), so scripts now
+  SKIP here instead of running, unlike the old hardcoded fallback."
+  resolution: not a defect — this is the acceptance criterion, not a
+  regression. Issue #34's Acceptance requires exactly this: "on a plain
+  checkout without CLAUDE_PLUGIN_ROOT_CORE, every test script exits
+  with the convention's SKIP contract... zero misleading failures."
+  The old hardcoded personal-absolute-path fallback (which happened to
+  resolve on this one machine's ad hoc layout) is the anti-pattern
+  issue #34 exists to remove — it is exactly the kind of
+  spawn-env-shaped assumption the issue's own title calls out ("tests
+  fail outside spawn env because they assume the spawn environment").
+  The proposal's Rationale/Constraints explicitly scoped the sibling
+  candidates to the convention's own order (env var -> caller-supplied
+  sibling checkouts -> SKIP) and explicitly rejected re-adding a
+  hardcoded personal path as part of the canonical contract. With
+  `CLAUDE_PLUGIN_ROOT_CORE` exported (the spawn-env case, and also
+  reachable locally by exporting it to this same machine's actual core
+  checkout), all six scripts run their full suites unchanged (15/15,
+  13/13, 19/19, 17/17, 16/16, 17/17 passed, 0 failed) — see "What I
+  ran" above. code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
+
 ## Closed checks
 - closed_checks: skip-contract-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
 - closed_checks: core-reachable-full-pass-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
