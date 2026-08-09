@@ -5,11 +5,23 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 HOOKS="$HERE"
 GATE="timeline-order-gate.sh"
-# Test-only override: this dev checkout is not laid out as a sibling of
-# core (the runtime install layout the gate's own fallback assumes), so
-# point CLAUDE_PLUGIN_ROOT_CORE at core directly rather than relying on
-# the ../../core fallback.
-export CLAUDE_PLUGIN_ROOT_CORE="${CLAUDE_PLUGIN_ROOT_CORE:-/home/jwjung/tokenmaxxxer/tokenmaxxxer-core/core}"
+# Resolve CLAUDE_PLUGIN_ROOT_CORE per the canonical test-env resolution
+# convention (docs/specs/test-env-resolution.md, on-the-record #551):
+# env var -> sibling candidates -> SKIP contract. No network fetch.
+if [ -n "${CLAUDE_PLUGIN_ROOT_CORE:-}" ] && [ -s "$CLAUDE_PLUGIN_ROOT_CORE/hooks/lib/gate-lib.sh" ]; then
+  :
+else
+  resolved=""
+  for cand in "$HERE/../../core" "$HERE/../../../tokenmaxxxer-core/core"; do
+    if [ -s "$cand/hooks/lib/gate-lib.sh" ]; then resolved="$cand"; break; fi
+  done
+  if [ -n "$resolved" ]; then
+    export CLAUDE_PLUGIN_ROOT_CORE="$resolved"
+  else
+    echo "SKIP: core plugin unreachable — unverifiable outside spawn env" >&2
+    exit 75
+  fi
+fi
 pass=0; fail=0
 report() { if [ "$2" = "$1" ]; then pass=$((pass+1)); printf 'ok     %-60s %s\n' "$3" "$2"; else fail=$((fail+1)); printf 'FAIL   %-60s want=%s got=%s\n' "$3" "$1" "$2"; fi; }
 
