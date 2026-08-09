@@ -1,9 +1,15 @@
 ---
-code_under_review: pending-commit
+code_under_review:
+  - timeline-order-gate/hooks/timeline-order-gate-tests.sh
+  - proposal-order-gate/hooks/proposal-order-gate-tests.sh
+  - freelunch-completeness-gate/hooks/freelunch-completeness-gate-tests.sh
+  - contributing-factors-gate/hooks/contributing-factors-gate-tests.sh
+  - action-item-shape-gate/hooks/action-item-shape-gate-tests.sh
+  - recurred-prediction-gate/hooks/recurred-prediction-gate-tests.sh
 type: fix
 breaking: false
 verdict: pass
-loop_state: committing
+loop_state: landed
 ---
 
 # Implementation record — issue #34
@@ -71,9 +77,9 @@ None.
 None.
 
 ## Closed checks
-- closed_checks: skip-contract-all-six-scripts, code_sha=pending-commit
-- closed_checks: core-reachable-full-pass-all-six-scripts, code_sha=pending-commit
-- closed_checks: convention-doc-referenced-all-six-scripts, code_sha=pending-commit
+- closed_checks: skip-contract-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
+- closed_checks: core-reachable-full-pass-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
+- closed_checks: convention-doc-referenced-all-six-scripts, code_sha=c1065dd9b17349c4beea79a67e70a7c69b83fed4
 
 ## Next steps
 None — commit and open PR closing #34.
