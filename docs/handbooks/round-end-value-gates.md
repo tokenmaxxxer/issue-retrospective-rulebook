@@ -31,3 +31,13 @@ Fail condition: any point where such a reader would get stuck → that stuck
 point is a **records defect** to report in this role's findings (always
 `severity: advisory`), never a gap to route around by explaining it
 out-of-band.
+
+## C. Timeline sourcing preference (issue-1199 fold-in)
+
+When two records disagree on when something happened, or a record only
+summarizes an event after the fact, prefer the record entry closest to
+the event's own timestamp over a later narrative recounting of it —
+build the timeline forward from that earliest entry, not backward from
+whichever record was read last. This is a sourcing preference, not a new
+gate: it resolves ties the mechanical gates cannot see, the same way
+questions A and B do.
