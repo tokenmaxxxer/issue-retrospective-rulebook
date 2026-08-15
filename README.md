@@ -76,6 +76,9 @@ Additionally:
                                         record body order: retro_id, Timeline,
                                         Impact summary, Contributing factors,
                                         What we learned, Action items
+    docs/handbooks/round-end-value-gates.md            checklist (A) procedure-value,
+                                        (B) blind-onboarding, (C) timeline
+                                        sourcing preference (issue-1199)
 
 ## Kill switches
 
