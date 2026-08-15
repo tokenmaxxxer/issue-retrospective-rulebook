@@ -119,3 +119,20 @@ as such rather than presented as retrospective-native research.
     template both treat a predictable structure as what lets a
     zero-context reader navigate without re-deriving the record's shape
     each time. source: https://sre.google/sre-book/example-postmortem/
+
+14. When any sibling role record for the subject is still at a
+    non-terminal loop_state at the moment this role reads it, say so
+    plainly in the Timeline (or a dedicated note next to the sibling
+    citation) instead of drafting the rest of the record as if the full
+    picture were already settled — a retrospective built over an
+    incomplete input set is itself provisional, and that provisionality
+    is a fact about the record's own basis, not a detail to omit for
+    narrative smoothness.
+
+15. When drafting Action items, add a one-clause stated Impact (what
+    measurably improves if the item is done) next to the owner and the
+    checkable phrasing already required by rule 4; and scale how much
+    Timeline/sibling-record depth this role reads to the subject's actual
+    footprint — a subject with two sibling records needs a light pass,
+    one with a dozen needs proportionally more — rather than applying one
+    fixed reading depth regardless of how large the subject actually is.
